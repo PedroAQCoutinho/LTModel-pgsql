@@ -211,11 +211,24 @@ LEFT JOIN lt_model.temp_car_sigef_union c2 ON c1.gid != c2.gid AND ST_Intersects
 WHERE NOT c1.fla_sigef AND NOT c2.fla_sigef
 GROUP BY c1.gid, c1.geom;
 
-CREATE TEMP TABLE lt_model.is_premium AS
-SELECT b.*, (1- (ST_Area(b.geom)/b.shape_area)) <= 0.05 fla_car_premium
+CREATE TEMP TABLE is_premium AS
+SELECT *, (1- (new_area/shape_area)) <= 0.05 fla_car_premium
+FROM (
+SELECT b.*, ST_Area(b.geom) new_area
 FROM car_result a
 JOIN lt_model.temp_car_sigef_union b ON a.gid = b.gid
-WHERE NOT fla_sigef;
+WHERE NOT fla_sigef) c;
+
+CREATE INDEX ix_is_premium ON is_premium USING BTREE (gid);
+CREATE INDEX ix_is_premium_2 ON is_premium USING BTREE (fla_car_premium);
+CREATE INDEX gix_is_premium ON is_premium USING GIST (geom);
+
+
+-- CREATE TABLE of everything that intersects
+CREATE TEMP TABLE car_intersects AS
+SELECT a.gid, b.gid gid2, a.fla_car_premium, b.fla_car_premium fla_car_premium2, a.new_area
+FROM is_premium a
+JOIN is_premium b ON a.gid <> b.gid AND ST_DWithin(a.geom, b.geom, 0);
 
 -- log premium
 INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
@@ -239,23 +252,94 @@ is_premium b
 WHERE operation.nom_operation = 'car_prime' AND NOT fla_car_premium
 GROUP BY operation.id;
 
+--log prime self intersection
+INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
+	SELECT currval('seq_current_run'),
+	operation.id,
+	COUNT(*),
+	SUM(new_area)
+FROM log_operation operation,
+(SELECT DISTINCT ON (gid) * FROM car_intersects 
+) b
+WHERE operation.nom_operation = 'car_prime_self_overlay' AND NOT b.fla_car_premium AND NOT b.fla_car_premium2
+GROUP BY operation.id;
 
--- Create id pair where max overlays
-CREATE TEMP TABLE car_max_self_overlay AS
-SELECT DISTINCT ON (a.gid) a.gid small, b.gid big
-FROM is_premium a
-JOIN is_premium b ON ST_Intersects(a.geom, b.geom) AND a.gid <> b.gid
-WHERE NOT a.fla_car_premium AND NOT b.fla_car_premium
-ORDER BY a.gid, ST_Area(ST_Intersection(a.geom, ST_Buffer(b.geom, -0.01))) DESC
+
+--log premium self intersection
+INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
+	SELECT currval('seq_current_run'),
+	operation.id,
+	COUNT(*),
+	SUM(new_area)
+FROM log_operation operation,
+(SELECT DISTINCT ON (gid) * FROM car_intersects 
+) b
+WHERE operation.nom_operation = 'car_premium_self_overlay' AND b.fla_car_premium AND b.fla_car_premium2
+GROUP BY operation.id;
+
 
 -- Clean CAR_prime with self overlay priority to small
-CREATE TEMP TABLE car_clean_bigger AS
-SELECT a.gid, ST_Difference(a.geom, b.geom) geom
-FROM is_premium a
-JOIN is_premium b ON ST_Intersects(a.geom, b.geom) AND a.gid <> b.gid AND a.shape_area > b.shape_area
-WHERE NOT a.fla_car_premium AND NOT b.fla_car_premium;
+DROP TABLE IF EXISTS car_prime_clean;
+CREATE TEMP TABLE car_prime_clean AS
+SELECT a.gid, ST_Difference(a.geom, ST_Buffer(ST_Collect(b.geom),-0.01)) geom, a.shape_area
+FROM car_intersects c
+JOIN is_premium a ON c.gid = a.gid
+JOIN is_premium b ON c.gid2 = b.gid AND a.shape_area > b.shape_area
+WHERE NOT c.fla_car_premium AND NOT c.fla_car_premium2
+GROUP BY a.gid, a.geom, a.shape_area;
 
--- PAREI AQUI: falta fazer autosobreposição do premium.
+-- premium overlay
+DROP TABLE IF EXISTS car_premium_clean;
+CREATE TEMP TABLE car_premium_clean AS
+SELECT a.gid, CASE WHEN MAX(B.gid) IS NULL THEN a.geom ELSE ST_Difference(a.geom, ST_Buffer(ST_Collect(b.geom),-0.01)) END geom, a.shape_area
+FROM car_intersects c
+JOIN is_premium a ON c.gid = a.gid
+LEFT JOIN is_premium b ON c.gid2 = b.gid AND a.gid < b.gid
+WHERE c.fla_car_premium AND c.fla_car_premium2
+GROUP BY a.gid, a.geom, a.shape_area;
+
+CREATE INDEX gix_car_prime_clean ON car_prime_clean USING GIST (geom);
+CREATE INDEX gix_car_premium_clean ON car_premium_clean USING GIST (geom);
+
+--Create prime without premium
+DROP TABLE IF EXISTS car_prime_clean_without_premium;
+CREATE TEMP TABLE car_prime_clean_without_premium AS
+SELECT gid, geom, shape_area, (area_previous-ST_Area(geom)) area_loss
+FROM (SELECT prime.gid, ST_Difference(prime.geom, ST_Buffer(ST_Collect(premium.geom), -0.01)) geom, ST_Area(prime.geom) area_previous, prime.shape_area
+FROM car_prime_clean prime
+JOIN car_premium_clean premium ON ST_DWithin(prime.geom, premium.geom, 0)
+GROUP BY prime.gid, prime.geom, prime.shape_area) a
+
+DELETE FROM car_prime_clean a
+USING car_prime_clean_without_premium b
+WHERE a.gid = b.gid
+
+
+--Log prime premium intersection
+INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
+	SELECT currval('seq_current_run'),
+	operation.id,
+	COUNT(b.gid),
+	SUM(area_loss)
+FROM log_operation operation,
+car_prime_clean_without_premium b
+WHERE operation.nom_operation = 'car_prime_premium_overlay'
+GROUP BY operation.id;
+
+
+--Output everything to single feature
+DROP TABLE IF EXISTS car_solved;
+CREATE TEMP TABLE car_solved AS
+SELECT * 
+FROM car_premium_clean 
+
+INSERT INTO car_solved
+SELECT gid, geom, shape_area
+FROM car_prime_clean;
+
+INSERT INTO car_solved
+SELECT gid, geom, shape_area
+FROM car_prime_clean_without_premium;
 
 
 UPDATE car_result
