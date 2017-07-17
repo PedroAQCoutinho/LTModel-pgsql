@@ -288,13 +288,13 @@ JOIN is_premium b ON c.gid2 = b.gid AND a.shape_area > b.shape_area
 WHERE NOT c.fla_car_premium AND NOT c.fla_car_premium2
 GROUP BY a.gid, a.geom, a.shape_area;
 
--- premium overlay
+-- Clean CAR_premium with self overlay priority to smaller
 DROP TABLE IF EXISTS car_premium_clean;
 CREATE TEMP TABLE car_premium_clean AS
 SELECT a.gid, CASE WHEN MAX(B.gid) IS NULL THEN a.geom ELSE ST_Difference(a.geom, ST_Buffer(ST_Collect(b.geom),-0.01)) END geom, a.shape_area
 FROM car_intersects c
 JOIN is_premium a ON c.gid = a.gid
-LEFT JOIN is_premium b ON c.gid2 = b.gid AND a.gid < b.gid
+LEFT JOIN is_premium b ON c.gid2 = b.gid AND a.gid > b.gid
 WHERE c.fla_car_premium AND c.fla_car_premium2
 GROUP BY a.gid, a.geom, a.shape_area;
 
