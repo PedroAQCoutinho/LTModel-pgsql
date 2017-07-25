@@ -3,8 +3,8 @@ SET search_path TO lt_model, public;
 
 CREATE SEQUENCE IF NOT EXISTS seq_current_run;
 
-SELECT nextval('seq_current_run');
 
+SELECT nextval('seq_current_run');
 
 DROP TABLE IF EXISTS invalid_geom;
 CREATE TEMP TABLE invalid_geom AS
@@ -137,12 +137,14 @@ CREATE INDEX gix_temp_car_3 ON temp_car_3 USING GIST (geom); --54s
 -- WHERE ci <= 0.12;
 
 -- SIGEF OVERLAYING
+CREATE INDEX gix_lt_model_sigef ON public.lt_model_sigef USING GIST (geom);
+
 DROP TABLE IF EXISTS temp_car_sigef;
 CREATE TEMP TABLE temp_car_sigef AS
 SELECT *, (1.0-(ST_Area(intersection_geom)/shape_area)) area_loss FROM (
-SELECT a.gid car, a.geom car_geom, ST_CollectionExtract(ST_Difference(a.geom, ST_Buffer(ST_Buffer(ST_Collect(b.geom), 0.01), -0.01)), 3) intersection_geom, a.shape_area, a.shape_leng
+SELECT a.gid car, a.geom car_geom, ST_CollectionExtract(ST_Difference(a.geom, ST_Buffer(ST_Collect(b.geom), -0.01)), 3) intersection_geom, a.shape_area, a.shape_leng
 FROM temp_car_3 a
-LEFT JOIN pa_br_acervofundiario_basefundiaria_privado_2016_incra b ON ST_DWithin(a.geom, b.geom, 0)
+LEFT JOIN public.lt_model_sigef b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom)
 GROUP BY a.gid, a.geom, a.shape_area, a.shape_leng) c;
 
 
@@ -172,8 +174,8 @@ GROUP BY operation.id;
 
 DROP TABLE IF EXISTS temp_car_sigef_union;
 CREATE TEMP TABLE temp_car_sigef_union AS
-SELECT gid, geom::geometry(MultiPolygon) geom, ST_Area(geom) shape_area, ST_Perimeter(geom) shape_leng, 0 area_loss, true fla_sigef
-FROM public.pa_br_acervofundiario_basefundiaria_privado_2016_incra;
+SELECT gid, ST_Multi(geom) geom, ST_Area(geom) shape_area, ST_Perimeter(geom) shape_leng, 0 area_loss, true fla_sigef
+FROM public.lt_model_sigef;
 
 INSERT INTO temp_car_sigef_union
 SELECT car, car_geom::geometry(MultiPolygon) geom, shape_area, shape_leng, 0 area_loss, false fla_sigef
@@ -197,9 +199,9 @@ SET geom = ST_Multi(ST_Buffer(ST_MakeValid(geom), 0));
 -- Tratamento do CAR priozando o menor
 DROP TABLE IF EXISTS car_result;
 CREATE TEMP TABLE car_result AS --
-SELECT c1.gid gid, ST_Difference(c1.geom, ST_Buffer(ST_Collect(c2.geom), -0.01)) geom, c1.area_loss incra_area_loss
+SELECT c1.gid gid, ST_Difference(c1.geom, ST_Buffer(ST_Collect(c2.geom), 0.01)) geom, c1.area_loss incra_area_loss
 FROM temp_car_sigef_union c1 
-LEFT JOIN temp_car_sigef_union c2 ON c1.gid != c2.gid AND ST_DWithin(c1.geom, c2.geom, 0)
+LEFT JOIN temp_car_sigef_union c2 ON c1.gid != c2.gid AND ST_Intersects(c1.geom, c2.geom) AND NOT ST_Touches(c1.geom, c2.geom)
 WHERE NOT c1.fla_sigef AND NOT c2.fla_sigef
 GROUP BY c1.gid, c1.geom, c1.area_loss;
 
