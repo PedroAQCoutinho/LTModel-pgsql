@@ -155,7 +155,7 @@ CREATE INDEX gix_temp_car_3 ON temp_car_3 USING GIST (geom);
 -- WHERE ci <= 0.12;
 
 -- SIGEF OVERLAYING
-CREATE INDEX IF NOT EXISTS gix_lt_model_sigef ON public.lt_model_sigef USING GIST (geom);
+CREATE INDEX IF NOT EXISTS gix_lt_model_sigef ON lt_model.lt_model_sigef USING GIST (geom);
 
 
 
@@ -181,7 +181,7 @@ SELECT
 	MAX(ST_Area(b.geom)) sigef_area, 
 	a.shape_leng
 FROM temp_car_3 a
-LEFT JOIN public.lt_model_sigef b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
+LEFT JOIN lt_model.lt_model_sigef b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
 	--AND ST_XMax(b.geom) < 658294.02429628 AND ST_XMin(b.geom) > 542810.3515331885 AND ST_YMax(b.geom) < -1077895.2638318148 AND ST_YMin(b.geom) > -1179502.5469183084
 GROUP BY a.gid, a.geom, a.shape_area, a.shape_leng) c;
 
@@ -224,7 +224,7 @@ GROUP BY operation.id;
 DROP TABLE IF EXISTS proc1_01_car_sigef_union;
 CREATE TABLE proc1_01_car_sigef_union AS
 SELECT gid, ST_Multi(geom) geom, ST_Area(geom) shape_area, ST_Perimeter(geom) shape_leng, 0 area_loss, true fla_sigef
-FROM public.lt_model_sigef
+FROM lt_model.lt_model_sigef
 --WHERE ST_XMax(geom) < 658294.02429628 AND ST_XMin(geom) > 542810.3515331885 AND ST_YMax(geom) < -1077895.2638318148 AND ST_YMin(geom) > -1179502.5469183084
 ;
 
@@ -583,12 +583,12 @@ END $$;
 ALTER TABLE proc1_11_temp_car_consolidated 
 ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;
 
-DROP TABLE IF EXISTS public.lt_model_car_po;
-CREATE TABLE public.lt_model_car_po AS
+DROP TABLE IF EXISTS lt_model.lt_model_car_po;
+CREATE TABLE lt_model.lt_model_car_po AS
 SELECT * FROM proc1_11_temp_car_consolidated;
 
-DROP TABLE IF EXISTS public.lt_model_car_pr;
-CREATE TABLE public.lt_model_car_pr AS
+DROP TABLE IF EXISTS lt_model.lt_model_car_pr;
+CREATE TABLE lt_model.lt_model_car_pr AS
 SELECT gid, shape_area, false, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, ST_Perimeter(geom), 1 ci, geom
 FROM proc1_07_car_solved
 WHERE is_premium;
