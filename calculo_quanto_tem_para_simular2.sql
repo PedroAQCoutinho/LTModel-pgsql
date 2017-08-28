@@ -278,10 +278,4 @@ SELECT a.cd_mun, a.gid, ai2, ROUND(a.area_ha/ai2) n_pontos, area_ha FROM proc3_1
 JOIN proc3_18_ultimo_necessario b ON a.cd_mun = b.cd_mun AND a.area_ha >= b.limiar_inferior2 AND a.area_ha < b.limiar_superior2 AND a.rnd <= b.rnd AND a.area_ha > (1.75 * ai2);
 
 
-DROP TABLE IF EXISTS lt_model.proc3_20_voronoifinal;
-CREATE TABLE lt_model.proc3_20_voronoifinal AS
-SELECT a.gid, CASE WHEN b.n_pontos = 1 OR b.n_pontos IS NULL THEN a.geom ELSE
-    ST_CollectionExtract(ST_Intersection((ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_GeneratePoints(geom, n_pontos), 0, geom), 3))).geom, geom), 3)
-END geom
-FROM proc3_14_area_simulada_sem_1ha a
-LEFT JOIN proc3_19_npontos b ON a.cd_mun = b.cd_mun AND a.gid = b.gid;
+ 
