@@ -1,30 +1,138 @@
 ﻿SET search_path TO lt_model, data, public;
 
+ALTER TABLE lt_model.result
+ADD COLUMN IF NOT EXISTS cd_mun_2006 INT;
+
+ALTER TABLE lt_model.result
+ADD COLUMN IF NOT EXISTS gid serial;
+
+
+
+CREATE INDEX IF NOT EXISTS gix_result ON lt_model.result USING GIST(geom);
+CREATE INDEX IF NOT EXISTS ix_result ON lt_model.result USING BTREE (gid);
+CREATE INDEX IF NOT EXISTS pa_br_limitemunicipal_2006_ibge ON pa_br_limitemunicipal_2006_ibge USING BTREE ((codmun7 % 15));
+
+
+-- UPDATE lt_model.result a 
+-- SET cd_mun_2006 = b.codmun7 
+-- FROM pa_br_limitemunicipal_2006_ibge b JOIN data.municipio_ibge c ON b.codmun7 = c.cod_ibge AND c.fk_estado_ibge = 35 
+-- WHERE ST_Within(a.geom, b.geom) AND (b.codmun7 % 15) = {num};
+
+
+-- $sql = 'UPDATE lt_model.result a SET cd_mun_2006 = b.codmun7 FROM pa_br_limitemunicipal_2006_ibge b JOIN data.municipio_ibge c ON b.codmun7 = c.cod_ibge AND c.fk_estado_ibge = 35 WHERE ST_Within(a.geom, b.geom) AND (b.codmun7 % 15) = {num};'
+-- 0..14 | % {start-process cmd "/k `"echo $($_) & psql -U postgres -h geonode -d atlas -c ""$($sql -Replace '{num}', $_)`""}
+
+DROP TABLE IF EXISTS lt_model.proc2_00_lo_mun;
+CREATE TABLE lt_model.proc2_00_lo_mun 
+(
+gid INT,
+codmun7 INT
+);
+
+
+-- INSERT INTO lt_model.proc2_00_lo_mun 
+-- SELECT a.gid, b.codmun7 
+-- FROM lt_model.result a 
+--     JOIN pa_br_limitemunicipal_2006_ibge b ON ST_Intersects(a.geom, b.geom) 
+-- WHERE a.cd_mun_2006 IS NULL AND b.coduf = 35 AND (b.codmun7 % 15) = {num};
+
+
+-- Powershell
+-- $sql = 'INSERT INTO lt_model.proc2_00_lo_mun SELECT a.gid, b.codmun7 FROM  lt_model.result a JOIN pa_br_limitemunicipal_2006_ibge b ON ST_Intersects(a.geom, b.geom) WHERE a.cd_mun_2006 IS NULL AND b.coduf = 35 AND (b.codmun7 % 15) = {num};'
+-- 0..14 | % {start-process cmd "/k `"echo $($_) & psql -U postgres -h geonode -d atlas -c ""$($sql -Replace '{num}', $_)`""}
+
+
+DROP TABLE IF EXISTS lt_model.proc3_01_mun2;
+CREATE TABLE lt_model.proc3_01_mun2 (
+gid INT, 
+codmun7 INT,
+area DOUBLE PRECISION
+);
+
+-- INSERT INTO lt_model.proc3_01_mun2 
+-- SELECT a.gid, a.codmun7, ST_Area(ST_Intersection(b.geom, c.geom)) area 
+-- FROM lt_model.proc2_00_lo_mun a 
+-- JOIN public.pa_br_limitemunicipal_2006_ibge b ON a.codmun7 = b.codmun7 JOIN lt_model.result c ON c.cd_mun_2006 IS NULL AND a.gid = c.gid 
+-- WHERE (b.codmun7 % 15) = {num};
+
+
+-- $sql = 'INSERT INTO lt_model.proc3_01_mun2 SELECT a.gid, a.codmun7, ST_Area(ST_Intersection(b.geom, c.geom)) area FROM lt_model.proc2_00_lo_mun a JOIN public.pa_br_limitemunicipal_2006_ibge b ON a.codmun7 = b.codmun7 JOIN lt_model.result c ON c.cd_mun_2006 IS NULL AND a.gid = c.gid WHERE (b.codmun7 % 15) = {num};'
+-- 0..14 | % {start-process cmd "/k `"echo $($_) & psql -U postgres -h geonode -d atlas -c ""$($sql -Replace '{num}', $_)`""}
+
+
+DROP TABLE IF EXISTS lt_model.proc3_02_mun3;
+CREATE TABLE lt_model.proc3_02_mun3 AS
+SELECT DISTINCT ON (gid) gid, codmun7 
+FROM lt_model.proc3_01_mun2
+ORDER BY gid, area DESC;
+
+
+UPDATE lt_model.result a
+SET cd_mun_2006 = b.codmun7
+FROM lt_model.proc3_02_mun3 b
+WHERE a.gid = b.gid;
+
+CREATE TABLE lt_model.result2 AS
+SELECT gid, table_source, ownership_class, sub_class, area_original, 
+       original_gid, ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), 3))::geometry('MultiPolygon', 97823) geom, area, ag_area_loss, aru_area_loss, carpo_area_loss, 
+       carpr_area_loss, com_area_loss, ml_area_loss, nd_area_loss, ql_area_loss, 
+       sigef_area_loss, ti_area_loss, tlpc_area_loss, tlpl_area_loss, 
+       trans_area_loss, ucpi_area_loss, ucus_area_loss, urb_area_loss, 
+       cd_mun_2006
+  FROM lt_model.result
+  WHERE cd_mun_2006 IS NOT NULL;
+
+
+
+DROP TABLE IF EXISTS lt_model.proc3_03_simulate;
+CREATE TABLE lt_model.proc3_03_simulate (
+cd_mun INT,
+geom geometry
+);
+
+
+CREATE INDEX ix_lt_model_result2 ON lt_model.result2 USING GIST (geom);
+
+-- INSERT INTO lt_model.proc3_03_simulate 
+-- SELECT a.codmun7 cd_mun, ST_Difference(a.geom, ST_Buffer(ST_CollectionExtract(ST_MakeValid(ST_Collect(b.geom)), 3), 0.01)) geom 
+-- FROM pa_br_limitemunicipal_2006_ibge a 
+-- LEFT JOIN lt_model.result2 b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
+-- WHERE (a.codmun7 % 15) = {num} 
+-- GROUP BY a.codmun7, a.geom;
+
+
+-- $sql = 'INSERT INTO lt_model.proc3_03_simulate SELECT a.codmun7 cd_mun, ST_Difference(a.geom, ST_Buffer(ST_CollectionExtract(ST_MakeValid(ST_Collect(b.geom)), 3), 0.01)) geom FROM pa_br_limitemunicipal_2006_ibge a LEFT JOIN lt_model.result2 b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) WHERE (a.codmun7 % 15) = {num} GROUP BY a.codmun7, a.geom;';
+-- 0..14 | % {start-process cmd "/k `"echo $($_) & psql -U postgres -h geonode -d atlas -c ""$($sql -Replace '{num}', $_)`""}
+
+
+DROP TABLE IF EXISTS lt_model.proc3_04_simulate_single;
+CREATE TABLE lt_model.proc3_04_simulate_single (
+gid SERIAL PRIMARY KEY,
+cd_mun INT,
+geom geometry
+);
+
+-- Powershell
+-- $sql = 'INSERT INTO lt_model.proc3_04_simulate_single(cd_mun, geom) SELECT cd_mun, (ST_Dump(geom)).geom FROM lt_model.proc3_03_simulate WHERE (cd_mun % 15) = {num};'
+-- 0..14 | % {start-process cmd "/k `"echo $($_) & psql -U postgres -h geonode -d atlas -c ""$($sql -Replace '{num}', $_)`""}
+
+
 --Imoveis a simular
 DROP TABLE IF EXISTS malha_municipio;
 CREATE TEMP TABLE malha_municipio AS
-SELECT a.id, b.id fk_censo_categoria_areas_ibge, m.codmun7 cod_mun, CASE WHEN COUNT(m.coduf) = 1 THEN a.area ELSE ST_Area(ST_Intersection(a.geom, m.geom))/10000 END area
-FROM lt_model.result AS a
-JOIN censo_categoria_areas_ibge AS b ON a.area/10000 >= b.limiar_inferior AND a.area/10000 < b.limiar_superior
-JOIN public.pa_br_limitemunicipal_2006_ibge m ON ST_Intersects(a.geom, m.geom) AND NOT ST_Touches(a.geom, m.geom)
-WHERE a.ownership_class = 'PR' AND m.coduf = 35 AND m.codmun7 = 3538709
-GROUP BY a.id, b.id, m.codmun7, a.area, a.geom, m.geom;
+SELECT a.gid, b.id fk_censo_categoria_areas_ibge, cd_mun_2006 cod_mun, area/10000 area
+FROM lt_model.result2 AS a
+JOIN data.censo_categoria_areas_ibge AS b ON a.area/10000 >= b.limiar_inferior AND a.area/10000 < b.limiar_superior
+WHERE a.ownership_class = 'PL';
 
-CREATE INDEX ix_malha ON malha_municipio USING BTREE (id);
+CREATE INDEX ix_malha ON malha_municipio USING BTREE (gid);
+
 
 DROP TABLE IF EXISTS malha_municipio2;
 CREATE TEMP TABLE malha_municipio2 AS
-SELECT cod_mun, fk_censo_categoria_areas_ibge, COUNT(*) contagem, SUM(area) area FROM malha_municipio a
+SELECT cod_mun, fk_censo_categoria_areas_ibge, COUNT(*) contagem, SUM(area) area 
+FROM malha_municipio a
 GROUP BY cod_mun, fk_censo_categoria_areas_ibge;
-
-DROP TABLE IF EXISTS num_imoveis_municipio_simular;
-CREATE TEMP TABLE num_imoveis_municipio_simular AS
-SELECT a.fk_municipio_ibge, a.fk_censo_categoria_areas_ibge, quantidade - CASE WHEN b.contagem IS NULL THEN 0 ELSE b.contagem END a_simular 
-FROM lt_model.num_propriedades_necessario a
-LEFT JOIN malha_municipio2 b ON b.cod_mun = a.fk_municipio_ibge AND b.fk_censo_categoria_areas_ibge = a.fk_censo_categoria_areas_ibge
-WHERE fk_municipio_ibge = 3548054
-ORDER BY a.fk_municipio_ibge, a.fk_censo_categoria_areas_ibge;
-
 
 
 
@@ -34,163 +142,140 @@ ORDER BY a.fk_municipio_ibge, a.fk_censo_categoria_areas_ibge;
 SELECT *, CASE WHEN limiar_inferior = 2500 THEN 5000 ELSE (limiar_superior+limiar_inferior)/2 END area_central FROM data.censo_categoria_areas_ibge ;
 
 -- Propriedades conhecidas
-DROP TABLE IF EXISTS prop_conhecidas;
-CREATE TEMP TABLE prop_conhecidas AS
-SELECT b.nom_categoria, contagem, area FROM data.censo_categoria_areas_ibge b
+DROP TABLE IF EXISTS proc3_05_prop_conhecidas;
+CREATE TABLE proc3_05_prop_conhecidas AS
+SELECT cod_mun, b.nom_categoria, contagem, area 
+FROM data.censo_categoria_areas_ibge b
 LEFT JOIN malha_municipio2 a ON b.id = a.fk_censo_categoria_Areas_ibge
 ORDER BY b.id;
 
 -- Percentuais do censo
-DROP TABLE IF EXISTS percentuais_censo;
-CREATE TEMP TABLE percentuais_censo AS
-SELECT b.nom_categoria, num_imoveis, area_ha, num_imoveis::numeric/SUM(num_imoveis) OVER (PARTITION BY fk_municipio_ibge) percentual FROM data.censo_categoria_areas_ibge b
-JOIN data.censo_areaimovel_ibge a ON a.fk_censo_categoria_areas_ibge = b.id
-WHERE fk_municipio_ibge = 3538709;
+DROP TABLE IF EXISTS proc3_06_percentuais_censo;
+CREATE TABLE proc3_06_percentuais_censo AS
+SELECT fk_municipio_ibge cd_mun, b.nom_categoria, num_imoveis, area_ha, num_imoveis::numeric/SUM(num_imoveis) OVER (PARTITION BY fk_municipio_ibge) percentual 
+FROM data.censo_categoria_areas_ibge b
+JOIN data.censo_areaimovel_ibge a ON a.fk_censo_categoria_areas_ibge = b.id;
 
 
 -- Área a simular
-DROP TABLE IF EXISTS area_simular;
-CREATE TEMP TABLE area_simular AS
+DROP TABLE IF EXISTS proc3_07_area_simular;
+CREATE TABLE proc3_07_area_simular AS
 SELECT cd_mun, SUM(ST_Area(geom))/10000 area 
-FROM to_simulate
-WHERE cd_mun = 3538709
+FROM lt_model.proc3_04_simulate_single a
+JOIN data.municipio_ibge b ON a.cd_mun = b.cod_ibge AND b.fk_estado_ibge = 35
 GROUP BY cd_mun;
 
 
 -- Tabela agregada de dados
-DROP TABLE IF EXISTS todos_dados;
-CREATE TEMP TABLE todos_dados AS
+DROP TABLE IF EXISTS proc3_08_todos_dados;
+CREATE TABLE proc3_08_todos_dados AS
 SELECT *, ai*ni ai_ni, ai*pi ai_pi
 FROM (
-SELECT b.nom_categoria, b.area_ha/b.num_imoveis ai, a.contagem ni, b.percentual pi
-FROM prop_conhecidas a 
-JOIN percentuais_censo b ON a.nom_categoria = b.nom_categoria
+SELECT b.cd_mun, b.nom_categoria, b.area_ha/b.num_imoveis ai, a.contagem ni, b.percentual pi
+FROM proc3_05_prop_conhecidas a 
+JOIN proc3_06_percentuais_censo b ON a.nom_categoria = b.nom_categoria AND a.cod_mun = b.cd_mun
 JOIN data.censo_categoria_areas_ibge c ON c.nom_categoria = b.nom_categoria) A;
 
-
 -- Tabela somatorios
-DROP TABLE IF EXISTS somatorios;
-CREATE TEMP TABLE somatorios AS
-SELECT SUM(ai_ni) soma_ai_ni, SUM(ai_pi) soma_ai_pi, SUM(ni) soma_ni
-FROM todos_dados;
+DROP TABLE IF EXISTS proc3_09_somatorios;
+CREATE TABLE proc3_09_somatorios AS
+SELECT cd_mun, SUM(ai_ni) soma_ai_ni, SUM(ai_pi) soma_ai_pi, SUM(ni) soma_ni
+FROM proc3_08_todos_dados
+GROUP BY cd_mun;
 
 -- Total a simular
-DROP TABLE IF EXISTS a_simular;
-CREATE TEMP TABLE a_simular AS
-SELECT ((s.area + soma_ai_ni)/soma_ai_pi) - soma_ni n FROM somatorios a, area_simular s;
+DROP TABLE IF EXISTS proc3_10_a_simular;
+CREATE TABLE proc3_10_a_simular AS
+SELECT a.cd_mun, ((s.area + soma_ai_ni)/soma_ai_pi) - soma_ni n FROM proc3_09_somatorios a
+JOIN proc3_07_area_simular s ON a.cd_mun = s.cd_mun;
 
-DROP TABLE IF EXISTS tudo_junto;
-CREATE TEMP TABLE tudo_junto AS
-SELECT todos_dados.*, (soma_ni+sim.n)*pi - ni si FROM todos_dados, somatorios sum, a_simular sim;
+DROP TABLE IF EXISTS proc3_11_tudo_junto;
+CREATE TABLE proc3_11_tudo_junto AS
+SELECT a.*, (soma_ni+sim.n)*pi - ni si FROM proc3_08_todos_dados a
+JOIN proc3_09_somatorios sum ON a.cd_mun = sum.cd_mun
+JOIN proc3_10_a_simular sim ON a.cd_mun = sim.cd_mun;
 
 
-DROP TABLE IF EXISTS a_limpar_area_simulada;
-CREATE TEMP TABLE a_limpar_area_simulada AS
+DROP TABLE IF EXISTS proc3_12_a_limpar_area_simulada;
+CREATE TABLE proc3_12_a_limpar_area_simulada AS
 SELECT cd_mun, geom
-FROM to_simulate
-WHERE cd_mun = 3538709;
+FROM proc3_04_simulate_single;
+
+DROP TABLE IF EXISTS proc3_13_limpa_area_simulada_result;
+CREATE TABLE proc3_13_limpa_area_simulada_result (
+cd_mun INT,
+geom geometry,
+gid INT,
+area_ha INT,
+rnd DOUBLE PRECISION DEFAULT random()
+);
+
+-- ALTER TABLE lt_model.proc3_13_limpa_area_simulada_result
+-- ADD COLUMN rnd DOUBLE PRECISION DEFAULT random();
+
+SELECT lt_model.clean_simulate_area(15, 0);
+
+-- powershell 
+-- $sql = 'SELECT lt_model.clean_simulate_area(15, {num});'
+-- 0..14 | % {start-process cmd "/k `"echo $($_) & psql -U postgres -h geonode -d atlas -c ""$($sql -Replace '{num}', $_)`""}
+
+DROP TABLE IF EXISTS proc3_14_area_simulada_sem_1ha;
+CREATE TABLE proc3_14_area_simulada_sem_1ha AS
+SELECT *
+FROM proc3_13_limpa_area_simulada_result
+WHERE area_ha > 1 AND (2*SQRT(PI()*area_ha*10000))/ST_Perimeter(geom) > 0.12;
 
 
-SELECT lt_model.limpa_area_simulada();
-
-
-ALTER TABLE limpa_area_simulada_result
-RENAME TO to_simulate_single;
-
-DELETE FROM to_simulate_single WHERE area_ha < 1;
-
-
-ALTER TABLE to_simulate_single
-		ADD COLUMN rnd double precision DEFAULT random();
-		
-
-DROP TABLE IF EXISTS to_simulate_distribuicao;
-CREATE TEMP TABLE to_simulate_distribuicao AS
-SELECT CASE WHEN b.id <= 8 THEN 'De 0 a menos de 5 ha' ELSE b.nom_categoria END nom_categoria2, COUNT(a.*) soma
+DROP TABLE IF EXISTS lt_model.proc3_15_to_simulate_distribuicao;
+CREATE TABLE lt_model.proc3_15_to_simulate_distribuicao AS
+SELECT cd_mun, CASE WHEN b.id <= 8 THEN 'De 0 a menos de 5 ha' ELSE b.nom_categoria END nom_categoria2, COUNT(a.*) soma
 FROM data.censo_categoria_areas_ibge b
-LEFT JOIN to_simulate_single a ON a.area_ha >= b.limiar_inferior AND a.area_ha < b.limiar_superior
-GROUP BY CASE WHEN b.id <= 8 THEN 1 ELSE b.id END, nom_categoria2
+LEFT JOIN lt_model.proc3_14_area_simulada_sem_1ha a ON a.area_ha >= b.limiar_inferior AND a.area_ha < b.limiar_superior
+GROUP BY CASE WHEN b.id <= 8 THEN 1 ELSE b.id END, nom_categoria2, cd_mun
 ORDER BY CASE WHEN b.id <= 8 THEN 1 ELSE b.id END;
 
-
 -- Agrupar as primeiras classes
-DROP TABLE IF EXISTS tudo_final;
-CREATE TEMP TABLE tudo_final AS
+DROP TABLE IF EXISTS lt_model.proc3_16_tudo_final;
+CREATE TABLE lt_model.proc3_16_tudo_final AS
 SELECT 
-	CASE WHEN rid <= 8 THEN 1 ELSE rid - 7 END rid2,
-	CASE WHEN rid <= 8 THEN 'De 0 a menos de 5 ha' ELSE A.nom_categoria END nom_categoria2,
-	CASE WHEN rid <= 8 THEN 0 ELSE limiar_inferior END limiar_inferior2,
-	CASE WHEN rid <= 8 THEN 5 ELSE limiar_superior END limiar_superior2,
-	CASE WHEN rid <= 8 THEN 2.5 ELSE ai END ai2,
+	cd_mun,
+	CASE WHEN B.id <= 8 THEN 1 ELSE B.id - 7 END rid2,
+	CASE WHEN B.id <= 8 THEN 'De 0 a menos de 5 ha' ELSE A.nom_categoria END nom_categoria2,
+	CASE WHEN B.id <= 8 THEN 0 ELSE limiar_inferior END limiar_inferior2,
+	CASE WHEN B.id <= 8 THEN 5 ELSE limiar_superior END limiar_superior2,
+	CASE WHEN B.id <= 8 THEN 2.5 ELSE ai END ai2,
 	SUM(ni) ni,
 	SUM(pi) pi,
 	SUM(ai_ni) ai_ni,
 	SUM(ai_pi) ai_pi, 
 	SUM(si) si
 FROM 
-(SELECT row_number() OVER () rid, * FROM tudo_junto) A
-JOIN data.censo_categoria_areas_ibge B ON A.rid = B.id
-GROUP BY rid2, nom_categoria2, ai2, limiar_inferior2, limiar_superior2
+(SELECT row_number() OVER () rid, * FROM lt_model.proc3_11_tudo_junto) A
+JOIN data.censo_categoria_areas_ibge B ON A.nom_categoria = B.nom_categoria
+GROUP BY cd_mun, rid2, nom_categoria2, ai2, limiar_inferior2, limiar_superior2
 ORDER BY rid2;
 
-DROP TABLE IF EXISTS final_simular;
-CREATE TEMP TABLE final_simular AS
+DROP TABLE IF EXISTS lt_model.proc3_17_final_simular;
+CREATE TABLE lt_model.proc3_17_final_simular AS
 SELECT a.*, b.soma ja_simulado, (ROUND(si - b.soma)) n_simular
-FROM tudo_final a
-JOIN to_simulate_distribuicao b ON a.nom_categoria2 = b.nom_categoria2;
+FROM lt_model.proc3_16_tudo_final a
+JOIN lt_model.proc3_15_to_simulate_distribuicao b ON a.cd_mun = b.cd_mun AND a.nom_categoria2 = b.nom_categoria2;
 
 
-SELECT * FROM final_simular
-UPDATE final_simular 
-SET n_simular = -16
-WHERE rid2 = 3;
-
-DROP TABLE IF EXISTS ultimo_necessario;
-CREATE TEMP TABLE ultimo_necessario AS
-SELECT DISTINCT ON (rid2) a.rid2, a.ai2, a.n_simular, b.limiar_inferior2, b.limiar_superior2, c.gid, c.rnd
-FROM (SELECT * FROM final_simular WHERE n_simular > 0 LIMIT 1) a
-LEFT JOIN final_simular b ON b.rid2 > a.rid2 AND a.n_simular > 0 AND b.n_simular < 0
-LEFT JOIN to_simulate_single c ON c.area_ha >= b.limiar_inferior2 AND c.area_ha < b.limiar_superior2 AND c.area_ha > (1.75 * a.ai2)
-LEFT JOIN to_simulate_single d ON d.area_ha >= b.limiar_inferior2 AND d.area_ha < b.limiar_superior2 AND d.rnd <= c.rnd AND d.area_ha > (1.75 * a.ai2)
-GROUP BY a.rid2, a.n_simular, a.ai2, b.rid2, b.limiar_inferior2, b.limiar_superior2,b.ai2, c.gid, c.rnd 
+DROP TABLE IF EXISTS lt_model.proc3_18_ultimo_necessario;
+CREATE TABLE lt_model.proc3_18_ultimo_necessario AS
+SELECT DISTINCT ON (a.cd_mun, rid2) a.cd_mun, a.rid2, a.ai2, a.n_simular, b.limiar_inferior2, b.limiar_superior2, c.gid, c.rnd
+FROM (SELECT DISTINCT ON (cd_mun) * FROM lt_model.proc3_17_final_simular WHERE n_simular > 0 ORDER BY cd_mun, rid2) a
+LEFT JOIN lt_model.proc3_17_final_simular b ON b.rid2 > a.rid2 AND a.n_simular > 0 AND b.n_simular < 0 AND a.cd_mun = b.cd_mun
+LEFT JOIN lt_model.proc3_14_area_simulada_sem_1ha c ON c.area_ha >= b.limiar_inferior2 AND c.area_ha < b.limiar_superior2 AND c.area_ha > (1.75 * a.ai2) AND b.cd_mun = c.cd_mun
+LEFT JOIN lt_model.proc3_14_area_simulada_sem_1ha d ON d.area_ha >= b.limiar_inferior2 AND d.area_ha < b.limiar_superior2 AND d.rnd <= c.rnd AND d.area_ha > (1.75 * a.ai2) AND c.cd_mun = d.cd_mun
+GROUP BY a.cd_mun, a.rid2, a.n_simular, a.ai2, b.rid2, b.limiar_inferior2, b.limiar_superior2,b.ai2, c.gid, c.rnd 
 HAVING SUM(d.area_ha) BETWEEN (a.ai2*a.n_simular) - (b.ai2/2) AND (a.ai2*a.n_simular) + (b.ai2/2)
-ORDER BY a.rid2, b.rid2, c.rnd;
+ORDER BY a.cd_mun, a.rid2, b.rid2, c.rnd;
 
-SELECT a.gid, ai2, ROUND(a.area_ha/ai2) n_pontos, area_ha FROM to_simulate_single a
-JOIN ultimo_necessario b ON a.area_ha >= b.limiar_inferior2 AND a.area_ha < b.limiar_superior2 AND a.rnd <= b.rnd AND a.area_ha > (1.75 * ai2)
+CREATE TABLE lt_model.proc3_19_npontos AS
+SELECT a.cd_mun, a.gid, ai2, ROUND(a.area_ha/ai2) n_pontos, area_ha FROM proc3_14_area_simulada_sem_1ha a
+JOIN proc3_18_ultimo_necessario b ON a.cd_mun = b.cd_mun AND a.area_ha >= b.limiar_inferior2 AND a.area_ha < b.limiar_superior2 AND a.rnd <= b.rnd AND a.area_ha > (1.75 * ai2);
 
 
-SELECT a.*, fk_categoria
-FROM to_simulate_single a
-
-WHERE fk_categoria > 2
-ORDER BY fk_categoria, rnd
-LIMIT 20;
-
-DO $$
-DECLARE pcursor REFCURSOR;
-DECLARE var_linha record;
-DECLARE rid_atual INT;
-BEGIN
-OPEN pcursor FOR SELECT * FROM final_simular WHERE n_simular > 0;
-
-	LOOP
-		FETCH FROM pcursor INTO var_linha;
-		EXIT WHEN NOT FOUND;
-		SELECT a.rid2, ROUND(SUM(70/b.ai2)) n_prop,  
-		FROM final_simular a
-		LEFT JOIN final_simular b ON b.rid2 <= a.rid2
-		WHERE a.rid2 > 2 AND a.n_simular < 0 AND b.n_simular < 0 AND b.rid2 > 2
-		GROUP BY a.rid2
-		HAVING SUM(b.n_simular * b.ai2) < -70
-		ORDER BY a.rid2;
-
-		
-		SELECT rnd FROM 
-		to_simulate_single a
-		LIMIT 10
-		IF rid_atual IS NOT NULL THEN
-		RAISE NOTICE '%', rid_atual;
-		END IF;
-	END LOOP;
-END $$;
+ 
