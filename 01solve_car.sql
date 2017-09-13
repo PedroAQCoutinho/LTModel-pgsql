@@ -1,30 +1,10 @@
-﻿-- CAR SOLVING
+SELECT clock_timestamp();
+
+-- CAR SOLVING
 SET search_path TO lt_model, public;
 
-CREATE SEQUENCE IF NOT EXISTS seq_current_run;
-
---SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
-SELECT nextval('seq_current_run');
-
-
-DROP TABLE IF EXISTS invalid_geom;
-CREATE TEMP TABLE invalid_geom AS
-SELECT gid, ST_Area(geom) area
-FROM es_sp_car_merge_050517_albers
-WHERE NOT ST_IsValid(geom);
-
-
--- Validates geometry
-INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
-	SELECT currval('seq_current_run'),
-	operation.id,
-	COUNT(*),
-	SUM(area)
-FROM log_operation operation,
-invalid_geom b
-WHERE operation.nom_operation = 'car_valid'
-GROUP BY operation.id;
-
+SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
+-- SELECT nextval('seq_current_run');
 
 
 -- Copy original table
@@ -32,18 +12,25 @@ DROP TABLE IF EXISTS temp_car_1;
 CREATE TEMP TABLE temp_car_1 AS
 SELECT 
 	a.gid, 
-	protocolo cod_imovel, 
+	cod_imovel cod_imovel, 
 	ST_Area(geom) shape_area, 
 	ST_Perimeter(geom) shape_leng, 
-	ST_CollectionExtract(
-		CASE WHEN b.gid > -1 THEN 
-			ST_MakeValid(geom) 
-		ELSE 
-			geom 
-		END , 3) geom
-FROM es_sp_car_merge_050517_albers a
-LEFT JOIN invalid_geom b ON a.gid = b.gid;
+	ST_Buffer(ST_CollectionExtract(ST_MakeValid(geom), 3), 0) geom,
+	ST_IsValid(geom) is_valid
+FROM :car_table a;
 --WHERE ST_XMax(a.geom) < 658294.02429628 AND ST_XMin(a.geom) > 542810.3515331885 AND ST_YMax(a.geom) < -1077895.2638318148 AND ST_YMin(a.geom) > -1179502.5469183084;
+
+-- Validates geometry
+INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
+	SELECT currval('seq_current_run'),
+	operation.id,
+	COUNT(*),
+	SUM(shape_area)
+FROM log_operation operation,
+temp_car_1 b
+WHERE operation.nom_operation = 'car_valid' AND NOT b.is_valid
+GROUP BY operation.id;
+
 
 -- Create indexes 1m06s
 --DROP INDEX ix_temp_car_1_1;
@@ -228,12 +215,10 @@ FROM lt_model.lt_model_sigef
 --WHERE ST_XMax(geom) < 658294.02429628 AND ST_XMin(geom) > 542810.3515331885 AND ST_YMax(geom) < -1077895.2638318148 AND ST_YMin(geom) > -1179502.5469183084
 ;
 
-
-
 INSERT INTO proc1_01_car_sigef_union
-SELECT car, car_geom::geometry(MultiPolygon) geom, shape_area, shape_leng, 0 area_loss, false fla_sigef
+SELECT car, ST_Multi(car_geom) geom, shape_area, shape_leng, 0 area_loss, false fla_sigef
 FROM proc1_00_car_sigef
-WHERE area_loss IS NULL OR area_loss = 0;
+WHERE area_loss IS NULL OR area_loss <= 0;
 
 -- Add CAR that lost less than 50% of its area
 INSERT INTO proc1_01_car_sigef_union
@@ -312,13 +297,13 @@ GROUP BY operation.id;
 
 
 -- CREATE TABLE of everything that intersects -- 11m29s
-DROP TABLE IF EXISTS car_intersects;
-CREATE TEMP TABLE car_intersects AS
+INSERT INTO lt_model.proc1_03_z1_car_intersects AS
 SELECT a.gid, b.gid gid2, a.fla_car_premium, b.fla_car_premium fla_car_premium2, a.new_area, a.incra_area_loss
 FROM proc1_03_is_premium a
-JOIN proc1_03_is_premium b ON a.gid <> b.gid AND ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom);
+JOIN proc1_03_is_premium b ON a.gid <> b.gid AND ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom)
+WHERE (gid % 15) = :var_proc;
 
-CREATE INDEX IF NOT EXISTS  ix_car_intersects ON car_intersects USING BTREE (gid, gid2);
+CREATE INDEX IF NOT EXISTS  ix_car_intersects ON lt_model.proc1_03_z1_car_intersects USING BTREE (gid, gid2);
 
 --log poor self intersection
 INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
@@ -327,7 +312,7 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 	COUNT(*),
 	SUM(new_area)
 FROM log_operation operation,
-(SELECT DISTINCT ON (gid) * FROM car_intersects 
+(SELECT DISTINCT ON (gid) * FROM lt_model.proc1_03_z1_car_intersects  
 ) b
 WHERE operation.nom_operation = 'car_poor_self_overlay' AND NOT b.fla_car_premium AND NOT b.fla_car_premium2
 GROUP BY operation.id;
@@ -340,7 +325,7 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 	COUNT(*),
 	SUM(new_area)
 FROM log_operation operation,
-(SELECT DISTINCT ON (gid) * FROM car_intersects 
+(SELECT DISTINCT ON (gid) * FROM lt_model.proc1_03_z1_car_intersects 
 ) b
 WHERE operation.nom_operation = 'car_premium_self_overlay' AND b.fla_car_premium AND b.fla_car_premium2
 GROUP BY operation.id;
@@ -366,65 +351,98 @@ CREATE INDEX ix_proc1_03_is_premium_3 ON proc1_03_is_premium USING BTREE (rnd);
 
 -- Clean CAR_poor with self overlay random priority -- 1m58s
 DROP TABLE IF EXISTS proc1_04_car_poor_clean;
-CREATE TABLE proc1_04_car_poor_clean AS
+CREATE TABLE proc1_04_car_poor_clean (
+	gid INTEGER,
+	geom geometry,
+	shape_area NUMERIC,
+	incra_area_loss NUMERIC
+)
+
+
+INSERT INTO proc1_04_car_poor_clean
 SELECT a.gid, 
+	ST_CollectionExtract(
 	CASE COUNT(b.gid) 
 	WHEN 0 THEN 
 		a.geom 
 	WHEN 1 THEN
-		ST_Difference(a.geom, ST_Collect(b.geom)) 
+		ST_Difference(a.geom, ST_GeometryN(ST_Collect(b.geom),1)) 
 	ELSE 
-		ST_Difference(a.geom, ST_Buffer(ST_Buffer(ST_Collect(b.geom), 0.01),-0.01)) 
-	END geom, 
+		ST_Difference(a.geom, ST_Buffer(ST_Union(b.geom), 0)) 
+	END, 3) geom, 
 	a.shape_area, 
 	a.incra_area_loss
 FROM proc1_03_is_premium a
-LEFT JOIN car_intersects c ON a.gid = c.gid
+LEFT JOIN proc1_03_z1_car_intersects c ON a.gid = c.gid
 LEFT JOIN proc1_03_is_premium b ON b.gid = c.gid2 AND a.rnd > b.rnd AND NOT b.fla_car_premium
-WHERE NOT a.fla_car_premium
+WHERE NOT a.fla_car_premium AND (a.gid % 15) = :var_proc
 GROUP BY a.gid, a.geom, a.shape_area, a.incra_area_loss;
 
 -- Clean CAR_premium with self overlay random priority -- 3m27s
 DROP TABLE IF EXISTS proc1_05_car_premium_clean;
-CREATE TABLE proc1_05_car_premium_clean AS
+CREATE TABLE proc1_05_car_premium_clean
+(
+  gid integer,
+  geom geometry,
+  shape_area double precision,
+  incra_area_loss integer
+);
+
+
+INSERT INTO proc1_05_car_premium_clean
 SELECT a.gid, 
+	ST_CollectionExtract(
 	CASE COUNT(B.gid) 
 	WHEN 0 THEN 
 		a.geom 
 	WHEN 1 THEN 
 		ST_Difference(a.geom, ST_GeometryN(ST_Collect(b.geom),1))
 	ELSE 
-		ST_Difference(a.geom, ST_CollectionExtract(ST_MakeValid(ST_Buffer(ST_Collect(b.geom),-0.01)),3)) 
-	END geom, a.shape_area, a.incra_area_loss
+		ST_Difference(a.geom, ST_Buffer(ST_Union(b.geom),0)) 
+	END, 3) geom, a.shape_area, a.incra_area_loss
 FROM proc1_03_is_premium a
-LEFT JOIN car_intersects c ON c.gid = a.gid
+LEFT JOIN proc1_03_z1_car_intersects c ON c.gid = a.gid
 LEFT JOIN proc1_03_is_premium b ON c.gid2 = b.gid AND a.rnd > b.rnd AND b.fla_car_premium
-WHERE a.fla_car_premium 
+WHERE a.fla_car_premium AND (a.gid % 15) = :var_proc
 GROUP BY a.gid, a.geom, a.shape_area, a.incra_area_loss;
 
 
 CREATE INDEX gix_proc1_04_car_poor_clean ON proc1_04_car_poor_clean USING GIST (geom);
 CREATE INDEX gix_proc1_05_car_premium_clean ON proc1_05_car_premium_clean USING GIST (geom);
+ANALYZE proc1_04_car_poor_clean ;
+ANALYZE proc1_05_car_premium_clean ;
 
 
 --Create poor without premium -- 8m54s
 DROP TABLE IF EXISTS proc1_06_car_poor_clean_without_premium;
-CREATE TABLE proc1_06_car_poor_clean_without_premium AS
+CREATE TABLE proc1_06_car_poor_clean_without_premium
+(
+  gid integer,
+  geom geometry,
+  shape_area double precision,
+  area_loss double precision,
+  incra_area_loss integer,
+  fla_overlay_poor_premium boolean
+);
+
+INSERT INTO proc1_06_car_poor_clean_without_premium
 SELECT gid, geom, shape_area, (area_previous-ST_Area(geom)) area_loss, incra_area_loss, fla_overlay_poor_premium
 FROM (
 SELECT poor.gid, 
+	ST_CollectionExtract(
 	CASE COUNT(premium.gid) 
 	WHEN 0 THEN
 		poor.geom
 	WHEN 1 THEN
-		ST_Difference(poor.geom, ST_Collect(premium.geom))
+		ST_Difference(poor.geom, ST_GeometryN(ST_Collect(premium.geom), 1))
 	ELSE
-		ST_Difference(poor.geom, ST_Buffer(ST_Collect(premium.geom), -0.01)) 
-	END geom, 
+		ST_Difference(poor.geom, ST_Buffer(ST_Collect(premium.geom), 0.01)) 
+	END, 3) geom, 
 ST_Area(poor.geom) area_previous, poor.shape_area, poor.incra_area_loss,
 COUNT(premium.gid) > 0 fla_overlay_poor_premium
 FROM proc1_04_car_poor_clean poor
 LEFT JOIN proc1_05_car_premium_clean premium ON ST_Intersects(poor.geom, premium.geom) AND NOT ST_Touches(poor.geom, premium.geom)
+WHERE (poor.gid % 15) = :var_proc
 GROUP BY poor.gid, poor.geom, poor.shape_area, poor.incra_area_loss) a;
 
 --Log poor premium intersection
@@ -454,7 +472,6 @@ ADD COLUMN is_single BOOLEAN DEFAULT false;
 
 UPDATE proc1_07_car_solved
 SET is_single = ST_GeometryType(geom) = 'ST_Polygon';
-
 
 ALTER TABLE proc1_07_car_solved
 ADD COLUMN new_area NUMERIC(30,2);
@@ -592,3 +609,5 @@ CREATE TABLE lt_model.lt_model_car_pr AS
 SELECT gid, shape_area, false, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, ST_Perimeter(geom), 1 ci, geom
 FROM proc1_07_car_solved
 WHERE is_premium;
+
+SELECT clock_timestamp()-current_timestamp;
