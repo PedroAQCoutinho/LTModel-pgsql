@@ -1,5 +1,3 @@
-﻿
-SELECT * FROM 
 
 DROP TABLE IF EXISTS lt_model.proc3_22_censo_modulos;
 CREATE TABLE lt_model.proc3_22_censo_modulos AS
@@ -78,5 +76,3 @@ n_imoveis_simulado,
 perc_censo,
 perc_resultado
  FROM lt_model.proc3_27_perc_final;
-
- SELECT * FROM lt_model.log_simulate;

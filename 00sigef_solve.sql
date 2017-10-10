@@ -1,10 +1,10 @@
-﻿SET search_path TO lt_model, public;
+SET search_path TO lt_model, public;
 
 --SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
 SELECT nextval('seq_current_run');
 
 -- SIGEF clean
-SELECT lt_model.clean_sigef('pa_br_acervofundiario_certimoveisruraislei10267_2001_privado_in', 'cod_imov1', 'data_cer5', currval('seq_current_run')::int, 35);
+SELECT lt_model.clean_sigef('pa_br_acervofundiario_certimoveisruraislei10267_2001_privado_in', 'cod_imov1', 'data_cer5', currval('seq_current_run')::int);
 
 DROP TABLE IF EXISTS proc0_01_sigef_lei2001;
 CREATE TABLE lt_model.proc0_01_sigef_lei2001 AS
@@ -12,7 +12,7 @@ SELECT * FROM sigef_cleaned;
 
 
 -- SIGEF law clean
-SELECT lt_model.clean_sigef('pa_br_acervofundiario_basefundiaria_privado_2016_incra', 'codigo_i4', 'data_apr7', currval('seq_current_run')::int, 35);
+SELECT lt_model.clean_sigef('pa_br_acervofundiario_basefundiaria_privado_2016_incra', 'codigo_i4', 'data_apr7', currval('seq_current_run')::int);
 
 DROP TABLE IF EXISTS proc0_02_sigef;
 CREATE TABLE lt_model.proc0_02_sigef AS
@@ -93,6 +93,10 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 DELETE FROM proc0_05_sigef_result
 WHERE area_loss2 > 95;
 
-DROP TABLE IF EXISTS public.lt_model_sigef;
-CREATE TABLE public.lt_model_sigef AS
-SELECT rid gid, * FROM proc0_05_sigef_result;
+DROP TABLE IF EXISTS lt_model.lt_model_sigef;
+CREATE TABLE lt_model.lt_model_sigef AS
+SELECT rid, gid, cod, original_area, area1, area2, cert_date, 
+       area_loss1, area_loss2, is_law2001, does_overlay, geom
+  FROM proc0_05_sigef_result;
+
+CREATE INDEX gix_lt_model_sigef ON lt_model.lt_model_sigef USING GIST (geom);
