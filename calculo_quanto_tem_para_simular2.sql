@@ -1,4 +1,4 @@
-﻿SET search_path TO lt_model, data, public;
+SET search_path TO lt_model, data, public;
 
 ALTER TABLE lt_model.result
 ADD COLUMN IF NOT EXISTS cd_mun_2006 INT;
@@ -72,6 +72,9 @@ SET cd_mun_2006 = b.codmun7
 FROM lt_model.proc3_02_mun3 b
 WHERE a.gid = b.gid;
 
+VACUUM ANALYZE lt_model.result;
+
+DROP TABLE IF EXISTS lt_model.result2;
 CREATE TABLE lt_model.result2 AS
 SELECT gid, table_source, ownership_class, sub_class, area_original, 
        original_gid, ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), 3))::geometry('MultiPolygon', 97823) geom, area, ag_area_loss, aru_area_loss, carpo_area_loss, 
@@ -118,20 +121,20 @@ geom geometry
 
 
 --Imoveis a simular
-DROP TABLE IF EXISTS malha_municipio;
-CREATE TEMP TABLE malha_municipio AS
+DROP TABLE IF EXISTS proc3_05_1_malha_municipio;
+CREATE TEMP TABLE proc3_05_1_malha_municipio AS
 SELECT a.gid, b.id fk_censo_categoria_areas_ibge, cd_mun_2006 cod_mun, area/10000 area
 FROM lt_model.result2 AS a
 JOIN data.censo_categoria_areas_ibge AS b ON a.area/10000 >= b.limiar_inferior AND a.area/10000 < b.limiar_superior
 WHERE a.ownership_class = 'PL';
 
-CREATE INDEX ix_malha ON malha_municipio USING BTREE (gid);
+CREATE INDEX ix_malha ON proc3_05_1_malha_municipio USING BTREE (gid);
 
 
-DROP TABLE IF EXISTS malha_municipio2;
-CREATE TEMP TABLE malha_municipio2 AS
+DROP TABLE IF EXISTS proc3_05_2_malha_municipio2;
+CREATE TEMP TABLE proc3_05_2_malha_municipio2 AS
 SELECT cod_mun, fk_censo_categoria_areas_ibge, COUNT(*) contagem, SUM(area) area 
-FROM malha_municipio a
+FROM proc3_05_1_malha_municipio a
 GROUP BY cod_mun, fk_censo_categoria_areas_ibge;
 
 
@@ -146,7 +149,7 @@ DROP TABLE IF EXISTS proc3_05_prop_conhecidas;
 CREATE TABLE proc3_05_prop_conhecidas AS
 SELECT cod_mun, b.nom_categoria, contagem, area 
 FROM data.censo_categoria_areas_ibge b
-LEFT JOIN malha_municipio2 a ON b.id = a.fk_censo_categoria_Areas_ibge
+LEFT JOIN proc3_05_2_malha_municipio2 a ON b.id = a.fk_censo_categoria_Areas_ibge
 ORDER BY b.id;
 
 -- Percentuais do censo
@@ -162,7 +165,7 @@ DROP TABLE IF EXISTS proc3_07_area_simular;
 CREATE TABLE proc3_07_area_simular AS
 SELECT cd_mun, SUM(ST_Area(geom))/10000 area 
 FROM lt_model.proc3_04_simulate_single a
-JOIN data.municipio_ibge b ON a.cd_mun = b.cod_ibge AND b.fk_estado_ibge = 35
+JOIN data.municipio_ibge b ON a.cd_mun = b.cod_ibge
 GROUP BY cd_mun;
 
 
@@ -250,7 +253,7 @@ SELECT
 	SUM(ai_pi) ai_pi, 
 	SUM(si) si
 FROM 
-(SELECT row_number() OVER () rid, * FROM lt_model.proc3_11_tudo_junto) A
+lt_model.proc3_11_tudo_junto A
 JOIN data.censo_categoria_areas_ibge B ON A.nom_categoria = B.nom_categoria
 GROUP BY cd_mun, rid2, nom_categoria2, ai2, limiar_inferior2, limiar_superior2
 ORDER BY rid2;
@@ -277,5 +280,14 @@ CREATE TABLE lt_model.proc3_19_npontos AS
 SELECT a.cd_mun, a.gid, ai2, ROUND(a.area_ha/ai2) n_pontos, area_ha FROM proc3_14_area_simulada_sem_1ha a
 JOIN proc3_18_ultimo_necessario b ON a.cd_mun = b.cd_mun AND a.area_ha >= b.limiar_inferior2 AND a.area_ha < b.limiar_superior2 AND a.rnd <= b.rnd AND a.area_ha > (1.75 * ai2);
 
+DROP TABLE IF EXISTS lt_model.proc3_20_voronoifinal;
+CREATE TABLE lt_model.proc3_20_voronoifinal AS
+SELECT cd_mun, row_number() OVER () as gid, geom, ST_Area(geom)::numeric(30,4) area
+FROM (
+SELECT b.cd_mun, b.gid, CASE WHEN a.gid IS NULL THEN b.geom ELSE ST_CollectionExtract(ST_Intersection((ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_GeneratePoints(geom, n_pontos), 0, geom), 3))).geom, geom), 3) END geom
+FROM lt_model.proc3_19_npontos a
+RIGHT JOIN lt_model.proc3_14_area_simulada_sem_1ha b ON a.cd_mun = b.cd_mun AND a.gid = b.gid) a;
 
- 
+
+INSERT INTO lt_model.result2 (gid, ownership_class, sub_class, area, area_original, geom)
+SELECT gid + (SELECT MAX(gid) FROM lt_model.result3), 'PL', 'SI', area, area, ST_Multi(ST_Force2D(geom)) FROM proc3_20_voronoifinal;

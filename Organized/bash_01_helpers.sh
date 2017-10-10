@@ -14,19 +14,7 @@ function waitAnyKey {
 }
 
 function runProc {
-  start_date="$(date)"
-  SECONDS=0
-  if $wait; then echo 1; else echo 2; fi
-  procName=$1
-  echo Running: $procName
-  $curDir/bash_02_execproc.sh $userName $databaseServer $databaseName $procName $numProc $carTable
-  echo Started:
-  echo $start_date
-  echo 
-  echo Finished:
-  date
-  echo Elapsed:
-  displaytime $SECONDS
+  $curDir/bash_02_execproc.sh $userName $databaseServer $databaseName $1 $numProc $carTable
   if $wait; then waitAnyKey; fi
 }
 

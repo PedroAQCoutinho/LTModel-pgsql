@@ -41,7 +41,8 @@ SELECT *,
 		false 
 	ELSE 
 		(new_area/shape_area) >= 0.95 
-	END fla_car_premium
+	END fla_car_premium,
+  shape_area-new_area area_loss2
 FROM (
 SELECT a.*, ST_Area(ST_CollectionExtract(b.geom,3)) new_area, b.incra_area_loss
 FROM proc1_01_car_sigef_union a

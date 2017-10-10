@@ -95,6 +95,8 @@ WHERE area_loss2 > 95;
 
 DROP TABLE IF EXISTS lt_model.lt_model_sigef;
 CREATE TABLE lt_model.lt_model_sigef AS
-SELECT rid gid, * FROM proc0_05_sigef_result;
+SELECT rid, gid, cod, original_area, area1, area2, cert_date, 
+       area_loss1, area_loss2, is_law2001, does_overlay, geom
+  FROM proc0_05_sigef_result;
 
 CREATE INDEX gix_lt_model_sigef ON lt_model.lt_model_sigef USING GIST (geom);
