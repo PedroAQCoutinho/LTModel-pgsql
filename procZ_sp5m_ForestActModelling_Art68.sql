@@ -473,7 +473,20 @@ create table if not exists fa_model.art68_imoveis_proc12 as
 		
 
 
-
+select
+	sum(def08),
+	sum(def_combo_1965all),
+	sum(def_combo_carta_d),
+	sum(def_combo_carta_r),
+	sum(def_combo_bioma_d),
+	sum(def_combo_bioma_r),
+	sum(def_combo_radamneutro_d),
+	sum(def_combo_radamneutro_r),
+	sum(def_combo_radamct89_d),
+	sum(def_combo_radamct89_r),
+	sum(def_combo_radamsv65_d),
+	sum(def_combo_radamsv65_r)
+from fa_model.art68_imoveis_proc12
 
 
 select distinct classe1965, classe1989, bioma, fito,
@@ -490,28 +503,7 @@ FROM pg_stat_activity
 WHERE state='active' AND query LIKE 'insert into fa_model%'
 
 
--- Criando os mapas de VN reclassificados para cada combo
--- drop table if exists fa_model.art68_combo_1965all;
--- create table if not exists fa_model.art68_combo_1965all as
--- 	select
--- 		case when b.combo_1965all not in ('ERRO1', 'ERRO2')
--- 			then ST_Union(geom)
--- 		end as geom
--- 	from fa_model.art68_mapa_vegnativa_proc4 as a
--- 	join fa_model.art68_mapa_vegnativa_proc5 as b
--- 	on a.gid = b.gid
--- 	group by b.combo_1965all;
 
--- drop table if exists fa_model.art68_combo_bioma;
--- create table if not exists fa_model.art68_combo_bioma as
--- 	select
--- 		case when b.combo_1965all not in ('ERRO1', 'ERRO2')
--- 			then ST_Union(geom)
--- 		end as geom
--- 	from fa_model.art68_mapa_vegnativa_proc4 as a
--- 	join fa_model.art68_mapa_vegnativa_proc5 as b
--- 	on a.gid = b.gid
--- 	group by b.combo_1965all;
 
 
 
