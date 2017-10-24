@@ -18,7 +18,7 @@ values (1,'AF','FLest','MATA',217.75,65.33,37.39,32.24,37.39,6.16),
 (4,'AF','FLest','MATA',217.75,15.24,37.39,32.24,37.39,6.16),
 (5,'AF','FLest','MATA',95.00,6.65,16.15,13.30,16.15,2.85),
 (6,'CE','Svsv','CERRADO',217.75,65.33,65.33,0.00,26.13,17.42),
-(7,'CE','Svsv','CERRADO',217.75,65.33,28.31,0.00,10.00,33.55),
+(7,'CE','Svsv','CERRADO',217.75,65.33,28.31,0.00,10.00,33.55)
 
 
 -- Regras de decisão para avaliacao dos passivos
@@ -30,10 +30,7 @@ create table if not exists fa_model.art68_imoveis_proc12 as
 		case when a.vn65 >= a.area_imovel * 0.2
 				then a.def08
 			 else 
-			 	case when a.vn65
-                    
-                    
-                    a.vn65 - a.vn08 < 0 then 0
+			 	case when a.vn65 - a.vn08 < 0 then 0
 				 	 else a.vn65 - a.vn08
 				end
 		end as def_combo_1965all,
@@ -207,5 +204,4 @@ create table if not exists fa_model.art68_imoveis_proc12 as
 						end
 				end
 		end as def_combo_radamsv65_r	
-
 	from fa_model.art68_imoveis_proc11 as a;
