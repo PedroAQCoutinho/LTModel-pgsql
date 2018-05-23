@@ -93,10 +93,10 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 DELETE FROM proc0_05_sigef_result
 WHERE area_loss2 > 95;
 
-DROP TABLE IF EXISTS lt_model.lt_model_sigef;
-CREATE TABLE lt_model.lt_model_sigef AS
+DROP TABLE IF EXISTS lt_model.lt_model_incra_pr;
+CREATE TABLE lt_model.lt_model_incra_pr AS
 SELECT rid, gid, cod, original_area, area1, area2, cert_date, 
        area_loss1, area_loss2, is_law2001, does_overlay, geom
   FROM proc0_05_sigef_result;
 
-CREATE INDEX gix_lt_model_sigef ON lt_model.lt_model_sigef USING GIST (geom);
+CREATE INDEX gix_lt_model_incra_pr ON lt_model.lt_model_incra_pr USING GIST (geom);

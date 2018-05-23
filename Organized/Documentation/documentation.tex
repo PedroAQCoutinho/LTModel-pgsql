@@ -1,0 +1,35 @@
+\documentclass{book}
+\usepackage[brazilian]{babel}
+\usepackage[inline]{enumitem}   
+
+\title{\bfseries {
+    Documentação do executável da malha fundiária
+}}
+\author{Caio Hamamura}
+
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\clearpage
+
+\pagenumbering{arabic}
+\chapter{INTRODUÇÃO}
+
+\section{Organização}
+O algoritmo da malha fundiária foi dividido em diferentes partes por meio de scripts no formato sql que estão ordenados segundo a ordem proc\{N1\}\_\{N2\}\_\{nome\}\_\{N3\}. Sendo: 
+\begin{itemize}
+    \item N1: número de 1 algarismo determinando número do grupo de processamento
+    \item N2: número de 2 algarismos, número da ordem de processamento
+    \item N3: número de 1 algarismo, subdividindo uma tarefa em uma ou 3 partes: \begin{itemize}
+        \item Uma parte: quando o algoritmo não necessita de paralelização e o comando pode ser executado por um único processo.
+        \item 3 partes: \begin{enumerate*}[label={Parte \arabic* - }]
+            \item Pré configuração, cria as tabelas e índices necessários.
+            \item Execução paralela, criando diversos processos que inserem paralelamente na mesma tabela.
+            \item Log e consolidação dos resultados.
+        \end{enumerate*}
+        
+    \end{itemize}
+\end{itemize}
+
+\end{document}

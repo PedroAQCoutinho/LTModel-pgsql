@@ -142,7 +142,7 @@ CREATE INDEX gix_temp_car_3 ON temp_car_3 USING GIST (geom);
 -- WHERE ci <= 0.12;
 
 -- SIGEF OVERLAYING
-CREATE INDEX IF NOT EXISTS gix_lt_model_sigef ON lt_model.lt_model_sigef USING GIST (geom);
+CREATE INDEX IF NOT EXISTS gix_lt_model_incra_pr ON lt_model.lt_model_incra_pr USING GIST (geom);
 
 
 
@@ -168,7 +168,7 @@ SELECT
 	MAX(ST_Area(b.geom)) sigef_area, 
 	a.shape_leng
 FROM temp_car_3 a
-LEFT JOIN lt_model.lt_model_sigef b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
+LEFT JOIN lt_model.lt_model_incra_pr b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
 	--AND ST_XMax(b.geom) < 658294.02429628 AND ST_XMin(b.geom) > 542810.3515331885 AND ST_YMax(b.geom) < -1077895.2638318148 AND ST_YMin(b.geom) > -1179502.5469183084
 GROUP BY a.gid, a.geom, a.shape_area, a.shape_leng) c;
 
@@ -211,7 +211,7 @@ GROUP BY operation.id;
 DROP TABLE IF EXISTS proc1_01_car_sigef_union;
 CREATE TABLE proc1_01_car_sigef_union AS
 SELECT gid, ST_Multi(geom) geom, ST_Area(geom) shape_area, ST_Perimeter(geom) shape_leng, 0 area_loss, true fla_sigef
-FROM lt_model.lt_model_sigef
+FROM lt_model.lt_model_incra_pr
 --WHERE ST_XMax(geom) < 658294.02429628 AND ST_XMin(geom) > 542810.3515331885 AND ST_YMax(geom) < -1077895.2638318148 AND ST_YMin(geom) > -1179502.5469183084
 ;
 

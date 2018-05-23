@@ -14,6 +14,7 @@ carTable=$5
 wait=$6
 specificProc=$7
 allProcs=(
+    proc0_sigef_solve
     proc1_01_makevalid 
     proc1_02_outsidebr 
     proc1_03_cleanequalshape 
@@ -64,9 +65,10 @@ function runAll {
 
 if [ "$specificProc" == "" ]
     then 
+        echo "Didn't specified proc, running from beginning!"
         runAll
     else
-        echo $specificProc
+        echo Started from proc: $specificProc
         for i in ${allProcs[@]}
         do 
             if [ "$i" == "$specificProc" ] || [ "$found" == "true" ]; then
