@@ -4,15 +4,15 @@ SET search_path TO lt_model, public;
 SELECT nextval('seq_current_run');
 
 -- SIGEF clean
-SELECT lt_model.clean_sigef('pa_br_acervofundiario_certimoveisruraislei10267_2001_privado_in', 'cod_imov1', 'data_cer5', currval('seq_current_run')::int);
+SELECT lt_model.clean_sigef((SELECT param_text FROM lt_model.params WHERE param_name = 'snci_input_table'), (SELECT param_text FROM lt_model.params WHERE param_name = 'snci_code_column'), (SELECT param_text FROM lt_model.params WHERE param_name = 'snci_cert_date_column'), currval('seq_current_run')::int);
 
-DROP TABLE IF EXISTS proc0_01_sigef_lei2001;
-CREATE TABLE lt_model.proc0_01_sigef_lei2001 AS
+DROP TABLE IF EXISTS proc0_01_snci;
+CREATE TABLE lt_model.proc0_01_snci AS
 SELECT * FROM sigef_cleaned;
 
 
 -- SIGEF law clean
-SELECT lt_model.clean_sigef('pa_br_acervofundiario_basefundiaria_privado_2016_incra', 'codigo_i4', 'data_apr7', currval('seq_current_run')::int);
+SELECT lt_model.clean_sigef((SELECT param_text FROM lt_model.params WHERE param_name = 'sigef_input_table'), (SELECT param_text FROM lt_model.params WHERE param_name = 'sigef_code_column'), (SELECT param_text FROM lt_model.params WHERE param_name = 'sigef_cert_date_column'), currval('seq_current_run')::int);
 
 DROP TABLE IF EXISTS proc0_02_sigef;
 CREATE TABLE lt_model.proc0_02_sigef AS
@@ -21,7 +21,7 @@ SELECT * FROM sigef_cleaned;
 DROP TABLE IF EXISTS lt_model.proc0_03_sigef_union;
 CREATE TABLE lt_model.proc0_03_sigef_union AS
 SELECT row_number() OVER ()::int rid, *
-FROM (SELECT *, true is_law2001 FROM proc0_01_sigef_lei2001
+FROM (SELECT *, true is_law2001 FROM proc0_01_snci
 UNION ALL
 SELECT *, false FROM proc0_02_sigef) a;
 
@@ -78,7 +78,7 @@ SELECT * FROM proc0_04_sigef_solved;
 
 DELETE FROM log_outputs a
 USING log_operation b
-WHERE a.fk_operation = b.id AND b.nom_operation = 'sigef_clean_lost_95area' AND num_run = currval('seq_current_run');
+WHERE a.fk_operation = b.id AND b.nom_operation = 'incra_pr_mischaracterized' AND num_run = currval('seq_current_run');
 
 INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 	SELECT currval('seq_current_run'),
@@ -87,15 +87,15 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 		SUM(area2)
 	FROM log_operation operation,
 	proc0_05_sigef_result b
-	WHERE operation.nom_operation = 'sigef_clean_lost_95area' AND b.area_loss2 > 95
+	WHERE operation.nom_operation = 'incra_pr_mischaracterized' AND b.area_loss2 > (SELECT param_value FROM lt_model.params WHERE param_name = 'incra_pr_exclusion_tolerance')
 	GROUP BY operation.id;
 
 DELETE FROM proc0_05_sigef_result
-WHERE area_loss2 > 95;
+WHERE area_loss2 > (SELECT param_value FROM lt_model.params WHERE param_name = 'incra_pr_exclusion_tolerance');
 
 DROP TABLE IF EXISTS lt_model.lt_model_incra_pr;
 CREATE TABLE lt_model.lt_model_incra_pr AS
-SELECT rid, gid, cod, original_area, area1, area2, cert_date, 
+SELECT rid, original_gid, cod, original_area, area1, area2, cert_date, 
        area_loss1, area_loss2, is_law2001, does_overlay, geom
   FROM proc0_05_sigef_result;
 
