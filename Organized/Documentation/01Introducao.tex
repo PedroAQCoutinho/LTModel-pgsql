@@ -1,22 +1,7 @@
-\documentclass{book}
-\usepackage[brazilian]{babel}
-\usepackage[inline]{enumitem}   
-
-\title{\bfseries {
-    Documentação do executável da malha fundiária
-}}
-\author{Caio Hamamura}
-
-
-\begin{document}
-\maketitle
-\thispagestyle{empty}
-\clearpage
-
-\pagenumbering{arabic}
 \chapter{INTRODUÇÃO}
+\begin{multicols}{2}
 
-\section{Organização}
+\section{Organização Geral}
 O algoritmo da malha fundiária foi dividido em diferentes partes por meio de scripts no formato sql que estão ordenados segundo a ordem proc\{N1\}\_\{N2\}\_\{nome\}\_\{N3\}. Sendo: 
 \begin{itemize}
     \item N1: número de 1 algarismo determinando número do grupo de processamento
@@ -28,8 +13,17 @@ O algoritmo da malha fundiária foi dividido em diferentes partes por meio de sc
             \item Execução paralela, criando diversos processos que inserem paralelamente na mesma tabela.
             \item Log e consolidação dos resultados.
         \end{enumerate*}
-        
     \end{itemize}
 \end{itemize}
+    
+Para facilitar a execução dos scripts sql foram desenvolvidos 3 bash files, sendo os dois primeiros auxiliares e o terceiro o executável funcional. Eles podem ser executados a partir do Bash instalado pelo Git (Git Bash), ou diretamente de um bash do linux. O script bash está organizado de tal forma que é possível solicitar para rodar todo o processamento de uma vez só.
 
-\end{document}
+\section{Ordem de Processamento}
+A ordem de processamento segue o seguinte padrão:
+\begin{enumerate}
+    \item Consolidação das bases do INCRA
+    \item Consolidação das bases do CAR
+    \item Junção da base do INCRA sobrepondo a base CAR
+    \item Processa a regra de sobreposição geral
+\end{enumerate}
+\end{multicols}
