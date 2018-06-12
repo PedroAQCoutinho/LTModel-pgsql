@@ -16,9 +16,9 @@ SELECT poor.gid,
 	ELSE
 		ST_Safe_Difference(poor.geom, ST_Collect(premium.geom))
 	END, 3) END geom, 
-ST_Area(poor.geom) area_previous, poor.shape_area, poor.incra_area_loss,
+ST_Area(poor.geom) area_previous, poor.shape_area,
 COUNT(premium.gid) > 0 fla_overlay_poor_premium
 FROM proc1_04_car_poor_clean poor
 LEFT JOIN proc1_05_car_premium_clean premium ON ST_Intersects(poor.geom, premium.geom) AND NOT ST_Touches(poor.geom, premium.geom)
 WHERE (poor.gid % :var_num_proc) = :var_proc
-GROUP BY poor.gid, poor.geom, poor.shape_area, poor.incra_area_loss) a;
+GROUP BY poor.gid, poor.geom, poor.shape_area) a;

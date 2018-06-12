@@ -7,7 +7,7 @@ CREATE TABLE proc1_07_car_solved AS
 SELECT *, true is_premium 
 FROM proc1_05_car_premium_clean
 UNION ALL
-SELECT gid, geom, shape_area, incra_area_loss, false
+SELECT gid, geom, shape_area, false
 FROM proc1_06_car_poor_clean_without_premium;
 
 
@@ -46,11 +46,11 @@ GROUP BY operation.id;
 -- Multi to single, calculate area and perimeter - 2.3
 DROP TABLE IF EXISTS proc1_09_car_single;
 CREATE TABLE proc1_09_car_single AS
-SELECT rid, gid, area_original, false fla_eliminate, 1-(area/area_original) area_loss, area, perimeter, CASE WHEN perimeter = 0 THEN 0 ELSE (2*SQRT(PI() * area))/perimeter END ci, geom, incra_area_loss
+SELECT rid, gid, area_original, false fla_eliminate, 1-(area/area_original) area_loss, area, perimeter, CASE WHEN perimeter = 0 THEN 0 ELSE (2*SQRT(PI() * area))/perimeter END ci, geom
 FROM (
-	SELECT row_number() OVER () rid, gid, area_original, ST_Area(geom) area, ST_Perimeter(geom) perimeter, geom, incra_area_loss
+	SELECT row_number() OVER () rid, gid, area_original, ST_Area(geom) area, ST_Perimeter(geom) perimeter, geom
 	FROM (
-		SELECT gid, shape_area area_original, (ST_Dump(geom)).geom, incra_area_loss
+		SELECT gid, shape_area area_original, (ST_Dump(geom)).geom
 		FROM proc1_08_car_poor_no_overlay
 		) A)
 	B;

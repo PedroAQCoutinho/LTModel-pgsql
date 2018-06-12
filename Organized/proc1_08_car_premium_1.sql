@@ -1,8 +1,8 @@
 SET search_path TO lt_model, public;
 
-DROP VIEW IF EXISTS projetos_2017.malha_relatorio_01_car_bruto_eliminate;
-DROP TABLE IF EXISTS proc1_03_is_premium;
+-- DROP VIEW IF EXISTS projetos_2017.malha_relatorio_01_car_bruto_eliminate;
 
+DROP TABLE IF EXISTS proc1_03_is_premium;
 CREATE TABLE proc1_03_is_premium
 (
   gid bigint,
@@ -10,9 +10,7 @@ CREATE TABLE proc1_03_is_premium
   shape_area double precision,
   shape_leng double precision,
   area_loss DOUBLE PRECISION,
-  fla_sigef boolean,
   new_area double precision,
-  incra_area_loss DOUBLE PRECISION,
   fla_car_premium boolean,
   rnd double precision DEFAULT random()
 );
@@ -34,20 +32,23 @@ CREATE INDEX ix_proc1_03_is_premium_3
   USING btree
   (rnd);
 
-
+DO $$
+DECLARE var_car_premium_tolerance INT = (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_tolerance');
+BEGIN
 INSERT INTO proc1_03_is_premium
 SELECT *, 
 	CASE WHEN new_area IS NULL THEN 
 		false 
 	ELSE 
-		(new_area/shape_area) >= 0.95 
+		(new_area/shape_area) >= var_car_premium_tolerance 
 	END fla_car_premium,
-  shape_area-new_area area_loss2
+  shape_area-new_area area_loss
 FROM (
-SELECT a.*, ST_Area(ST_CollectionExtract(b.geom,3)) new_area, b.incra_area_loss
-FROM proc1_01_car_sigef_union a
+SELECT a.*, ST_Area(ST_CollectionExtract(b.geom,3)) new_area
+FROM proc1_00_0makevalid a
 LEFT JOIN proc1_02_car_result b ON a.gid = b.gid
 WHERE NOT fla_sigef) c;
+END $$;
 
 
 

@@ -12,6 +12,5 @@ CREATE TABLE proc1_06_car_poor_clean_without_premium
   geom geometry,
   shape_area double precision,
   area_loss double precision,
-  incra_area_loss DOUBLE PRECISION,
   fla_overlay_poor_premium boolean
 );

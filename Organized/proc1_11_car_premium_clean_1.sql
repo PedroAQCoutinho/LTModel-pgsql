@@ -6,8 +6,7 @@ CREATE TABLE proc1_05_car_premium_clean
 (
   gid BIGINT,
   geom geometry,
-  shape_area double precision,
-  incra_area_loss DOUBLE PRECISION
+  shape_area double precision
 );
 
 CREATE INDEX gix_proc1_05_car_premium_clean
