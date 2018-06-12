@@ -8,13 +8,13 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 	operation.id,
 	COUNT(*),
 	SUM(
-		CASE WHEN shape_area IS NULL THEN 
+		CASE WHEN area IS NULL THEN 
 			0 
 		ELSE 
-			shape_area 
+			area 
 		END)
 FROM log_operation operation
-LEFT JOIN proc1_00_car_sigef b ON b.area_loss >= 0.5 OR b.area_loss IS NULL
+LEFT JOIN proc1_13_car_sigef b ON b.area_loss >= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_area_loss_tolerance') OR b.area_loss IS NULL
 WHERE operation.nom_operation = 'car_sigef_gte_50'
 GROUP BY operation.id;
 
@@ -25,12 +25,12 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 	operation.id,
 	COUNT(*),
 	SUM(
-		CASE WHEN shape_area IS NULL THEN 
+		CASE WHEN area IS NULL THEN 
 			0 
 		ELSE 
-			shape_area 
+			area 
 		END)
 FROM log_operation operation
-LEFT JOIN proc1_00_car_sigef b ON b.area_loss < 0.5
+LEFT JOIN proc1_13_car_sigef b ON b.area_loss < (SELECT param_value FROM lt_model.params WHERE param_name = 'car_area_loss_tolerance')
 WHERE operation.nom_operation = 'car_sigef_lt_50'
 GROUP BY operation.id;

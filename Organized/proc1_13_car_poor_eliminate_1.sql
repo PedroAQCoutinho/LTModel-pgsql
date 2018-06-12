@@ -60,9 +60,11 @@ FROM (
 --Calculating area loss
 UPDATE proc1_09_car_single
 SET fla_eliminate =  true
+FROM (SELECT param_value param_area FROM lt_model.params WHERE param_name = 'car_area_loss_tolerance') A,
+(SELECT param_value param_ci FROM lt_model.params WHERE param_name = 'car_ci_minimum') B
 WHERE 
-	area_loss > 0.5 OR
-	ci < 0.12;
+	area_loss > param_area OR
+	ci < param_ci;
 
 
 --Log CAR poor consolidated and to join
@@ -108,13 +110,12 @@ END $$;
 ALTER TABLE proc1_11_temp_car_consolidated 
 ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;
 
-DROP TABLE IF EXISTS lt_model.lt_model_car_po;
-CREATE TABLE lt_model.lt_model_car_po AS
-SELECT * FROM proc1_11_temp_car_consolidated;
+DROP TABLE IF EXISTS lt_model.proc1_12_result;
+CREATE TABLE lt_model.proc1_12_result AS
+SELECT gid, area_loss, area, area_original, perimeter, false is_premium, geom FROM proc1_11_temp_car_consolidated;
 
-DROP TABLE IF EXISTS lt_model.lt_model_car_pr;
-CREATE TABLE lt_model.lt_model_car_pr AS
-SELECT gid, shape_area, false, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, ST_Perimeter(geom), 1 ci, geom
+INSERT INTO lt_model.proc1_12_result
+SELECT gid, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, shape_area area_original, ST_Perimeter(geom) perimeter, is_premium, geom
 FROM proc1_07_car_solved
 WHERE is_premium;
 
