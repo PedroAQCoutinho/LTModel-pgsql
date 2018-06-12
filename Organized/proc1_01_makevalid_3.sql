@@ -10,3 +10,5 @@ FROM log_operation operation,
 proc1_00_0makevalid b
 WHERE operation.nom_operation = 'car_valid' AND NOT b.is_valid
 GROUP BY operation.id;
+
+\echo `rm *.txt`;
