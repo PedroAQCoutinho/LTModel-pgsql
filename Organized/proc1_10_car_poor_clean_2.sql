@@ -14,11 +14,10 @@ SELECT a.gid,
 			ST_Safe_Difference(a.geom, ST_Collect(b.geom))
 	END), 3) geom, 
 	a.shape_area
-FROM (SELECT param_text param_priority FROM lt_model.params WHERE param_name = 'priority_autointersection') d,
-proc1_03_is_premium a
+FROM proc1_03_is_premium a
 LEFT JOIN proc1_03_z1_car_intersects c ON a.gid = c.gid
 LEFT JOIN proc1_03_is_premium b ON b.gid = c.gid2 
-	AND (CASE param_priority
+	AND (CASE (SELECT param_text param_priority FROM lt_model.params WHERE param_name = 'priority_autointersection')
 			WHEN 'S' THEN 
 				b.shape_area < a.shape_area 
 			WHEN 'L' THEN
