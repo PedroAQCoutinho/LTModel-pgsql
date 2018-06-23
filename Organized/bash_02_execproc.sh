@@ -22,7 +22,6 @@ if [ -f $4_2.sql ]; then
     for ((i=0; i < $5; i++))
     do
         psql -U $userName -h $databaseServer -d $databaseName -v var_num_proc=$5 -v var_proc=$i -f $4_2.sql &
-        echo Finished proc $5
     done
     wait
 fi
