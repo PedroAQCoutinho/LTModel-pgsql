@@ -1,3 +1,4 @@
+SET search_path TO lt_model, public;
 SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
 
 

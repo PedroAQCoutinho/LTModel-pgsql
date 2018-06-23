@@ -1,3 +1,5 @@
+SET search_path TO lt_model, public;
+
 DO $$
 DECLARE var_car_premium_tolerance INT = (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_tolerance');
 BEGIN
