@@ -59,8 +59,7 @@ SELECT
 FROM (
 SELECT a.*, ST_Area(ST_CollectionExtract(b.geom,3)) new_area
 FROM proc1_00_0makevalid a
-LEFT JOIN proc1_02_car_result b ON a.gid = b.gid
-WHERE NOT fla_sigef) c;
+LEFT JOIN proc1_02_car_result b ON a.gid = b.gid) c;
 END $$;
 
 
