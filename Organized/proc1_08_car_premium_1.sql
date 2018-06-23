@@ -50,7 +50,7 @@ SELECT
   shape_area,
   shape_leng,
   shape_area-new_area area_loss,
-  new_area
+  new_area,
 	CASE WHEN new_area IS NULL THEN 
 		false 
 	ELSE 
