@@ -1,7 +1,13 @@
 SET search_path TO lt_model, public;
 
-INSERT INTO proc1_06_car_poor_clean_without_premium
-SELECT gid, geom, shape_area, (area_previous-ST_Area(geom)) area_loss, incra_area_loss, fla_overlay_poor_premium
+INSERT INTO proc1_06_car_poor_clean_without_premium (
+	gid,
+	geom,
+	shape_area,
+	area_loss,
+	fla_overlay_poor_premium 
+)
+SELECT gid, geom, shape_area, (area_previous-ST_Area(geom)) area_loss,  fla_overlay_poor_premium
 FROM (
 SELECT poor.gid, 
 	CASE WHEN ST_IsEmpty(poor.geom) THEN poor.geom ELSE 
