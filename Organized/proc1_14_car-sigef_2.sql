@@ -10,7 +10,7 @@ INSERT INTO proc1_13_car_sigef (
 )
 SELECT 
 	a.gid, 
-	1.0-(ST_Area(geom)/area_original) area_loss
+	1.0-(ST_Area(geom)/area_original) area_loss,
 	ST_Area(geom) area, 
 	area_original, 
 	is_premium,
