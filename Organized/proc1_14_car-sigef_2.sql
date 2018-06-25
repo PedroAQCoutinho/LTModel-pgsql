@@ -6,7 +6,7 @@ INSERT INTO proc1_13_car_sigef (
 	area,
 	area_original,
 	is_premium,
-	geom,
+	geom
 )
 SELECT 
 	a.gid, 
