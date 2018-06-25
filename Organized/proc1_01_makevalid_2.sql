@@ -11,5 +11,5 @@ SELECT
 	ST_Perimeter(geom) shape_leng, 
 	ST_Buffer(ST_CollectionExtract(ST_MakeValid(geom), 3), 0) geom,
 	ST_IsValid(geom) is_valid
-FROM :"car_table_schema".:"car_table_name" a
+FROM (SELECT gid, cod_imovel, ST_Transform(geom, 97823) geom :"car_table_schema".:"car_table_name") a
 WHERE (gid % :var_num_proc) = :var_proc;
