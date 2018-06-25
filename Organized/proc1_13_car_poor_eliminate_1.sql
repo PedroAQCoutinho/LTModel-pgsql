@@ -114,15 +114,15 @@ DROP TABLE IF EXISTS lt_model.proc1_12_car_cleaned;
 CREATE TABLE lt_model.proc1_12_car_cleaned AS
 SELECT gid, 1.0-(ST_Area(geom)/area_original) area_loss, ST_Area(geom) area, area_original, ST_Perimeter(geom) perimeter, false is_premium, geom 
 FROM (
-	SELECT gid, area_original, ST_Collect(geom) geom
+	SELECT gid, area_original, ST_CollectionExtract(ST_MakeValid(ST_Collect(geom)), 3) geom
 	FROM proc1_11_temp_car_consolidated
 	GROUP BY gid, area_original
 ) a;
 
 INSERT INTO lt_model.proc1_12_car_cleaned
 SELECT gid, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, shape_area area_original, ST_Perimeter(geom) perimeter, is_premium, geom
-FROM proc1_07_car_solved
-WHERE is_premium;
+FROM (SELECT gid, ST_CollectionExtract(ST_MakeValid(geom),3) geom, shape_area, area, area_original, is_premium proc1_07_car_solved
+WHERE is_premium);
 
 UPDATE lt_model.proc1_12_car_cleaned
 SET area_original = area, area_loss = 0
