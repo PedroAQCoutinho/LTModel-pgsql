@@ -111,14 +111,25 @@ ALTER TABLE proc1_11_temp_car_consolidated
 ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;
 
 DROP TABLE IF EXISTS lt_model.proc1_12_car_cleaned;
-CREATE TABLE lt_model.proc1_12_car_cleaned; AS
-SELECT gid, area_loss, area, area_original, perimeter, false is_premium, geom FROM proc1_11_temp_car_consolidated;
+CREATE TABLE lt_model.proc1_12_car_cleaned AS
+SELECT gid, 1.0-(ST_Area(geom)/area_original) area_loss, ST_Area(geom) area, area_original, ST_Perimeter(geom) perimeter, false is_premium, geom 
+FROM (
+	SELECT gid, area_original, ST_Collect(geom) geom
+	FROM proc1_11_temp_car_consolidated
+	GROUP BY gid, area_original
+) a;
 
 INSERT INTO lt_model.proc1_12_car_cleaned
 SELECT gid, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, shape_area area_original, ST_Perimeter(geom) perimeter, is_premium, geom
 FROM proc1_07_car_solved
 WHERE is_premium;
 
+UPDATE lt_model.proc1_12_car_cleaned
+SET area_original = area, area_loss = 0
+WHERE area_loss < 0;
 
+CREATE INDEX gix_proc1_12_car_cleaned
+ON lt_model.proc1_12_car_cleaned
+USING GIST (geom);
 
 SELECT clock_timestamp()-current_timestamp;
