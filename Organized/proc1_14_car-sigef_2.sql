@@ -22,8 +22,11 @@ SELECT
 	a.area, 
 	a.area_original, 
 	a.is_premium, 
-	CASE WHEN b.gid IS NULL THEN 
+	CASE COUNT(b.gid)
+	WHEN 0 THEN 
 		a.geom 
+	WHEN 1 THEN
+		ST_Difference(a.geom, ST_Collect(b.geom))
 	ELSE
 		ST_Safe_Difference(a.geom, ST_Collect(b.geom))
 	END geom
