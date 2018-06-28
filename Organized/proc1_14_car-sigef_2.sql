@@ -26,7 +26,7 @@ SELECT
 	a.area, 
 	a.area_original, 
 	a.is_premium, 
-	ST_CollectionExtact(ST_MakeValid(CASE COUNT(b.rid)
+	ST_CollectionExtract(ST_MakeValid(CASE COUNT(b.rid)
 	WHEN 0 THEN 
 		a.geom 
 	WHEN 1 THEN
