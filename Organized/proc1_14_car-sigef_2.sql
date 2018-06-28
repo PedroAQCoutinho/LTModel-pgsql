@@ -22,7 +22,7 @@ SELECT
 	a.area, 
 	a.area_original, 
 	a.is_premium, 
-	CASE COUNT(b.gid)
+	CASE COUNT(b.rid)
 	WHEN 0 THEN 
 		a.geom 
 	WHEN 1 THEN
