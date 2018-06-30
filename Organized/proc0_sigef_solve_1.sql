@@ -95,8 +95,8 @@ WHERE area_loss2 > (SELECT param_value FROM lt_model.params WHERE param_name = '
 
 DROP TABLE IF EXISTS lt_model.lt_model_incra_pr;
 CREATE TABLE lt_model.lt_model_incra_pr AS
-SELECT rid, original_gid, cod, original_area, area1, area2, cert_date, 
-       area_loss1, area_loss2, is_law2001, does_overlay, ST_CollectionExtract(ST_MakeValid(geom),3)
+SELECT rid, original_gid gid, cod, original_area, area1, area2, cert_date, 
+       area_loss1, area_loss2, is_law2001, does_overlay, ST_CollectionExtract(ST_MakeValid(geom),3) geom
   FROM proc0_05_sigef_result;
 
 CREATE INDEX gix_lt_model_incra_pr ON lt_model.lt_model_incra_pr USING GIST (geom);

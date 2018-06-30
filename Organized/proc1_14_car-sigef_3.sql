@@ -14,7 +14,7 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 			area 
 		END)
 FROM log_operation operation
-LEFT JOIN proc1_13_car_sigef b ON b.area_loss >= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_area_loss_tolerance') OR b.area_loss IS NULL
+LEFT JOIN proc1_13_car_sigef b ON b.area_loss >= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_incra_tolerance') OR b.area_loss IS NULL
 WHERE operation.nom_operation = 'car_sigef_gte_50'
 GROUP BY operation.id;
 
@@ -31,6 +31,6 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 			area 
 		END)
 FROM log_operation operation
-LEFT JOIN proc1_13_car_sigef b ON b.area_loss < (SELECT param_value FROM lt_model.params WHERE param_name = 'car_area_loss_tolerance')
+LEFT JOIN proc1_13_car_sigef b ON b.area_loss < (SELECT param_value FROM lt_model.params WHERE param_name = 'car_incra_tolerance')
 WHERE operation.nom_operation = 'car_sigef_lt_50'
 GROUP BY operation.id;

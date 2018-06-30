@@ -30,9 +30,9 @@ SELECT
 	WHEN 0 THEN 
 		a.geom 
 	WHEN 1 THEN
-		ST_Difference(a.geom, ST_Collect(b.geom))
+		ST_Difference(a.geom, ST_GeometryN(ST_Collect(b.geom), 1))
 	ELSE
-		ST_Safe_Difference(a.geom, ST_GeometryN(ST_Collect(b.geom), 1))
+		ST_Safe_Difference(a.geom, ST_Collect(b.geom))
 	END), 3) geom
 FROM lt_model.proc1_12_car_cleaned a
 LEFT JOIN lt_model.lt_model_incra_pr b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
