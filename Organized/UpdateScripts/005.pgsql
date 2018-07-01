@@ -11,7 +11,7 @@ INSERT INTO lt_model.params (param_name, param_desc, param_text)
 VALUES ('priority_autointersection', 'Prioridade de autointersecção, S=smaller, L=larger, R=random, obrigatoriamente maiúsculo', 'R');
 
 INSERT INTO lt_model.params (param_name, param_desc, param_value)
-VALUES ('car_area_loss_tolerance', 'Perda de área máxima aceitável. Ex: 0.5, todos os CAR que perderam mais de 50% de sua área serão apagados', 0.5);
+VALUES ('car_area_loss_tolerance', 'Perda de área máxima aceitável. Ex: 0.5, todos os CAR que perderam mais de 50% de sua área serão apagados ou mesclados', 0.5);
 
 INSERT INTO lt_model.params (param_name, param_desc, param_value)
 VALUES ('car_ci_minimum', 'Mínimo circularity index (CI) aceitável. Ex: 0.12, valores de CI < 0.12 serão removidos', 0.12);
