@@ -14,6 +14,15 @@ SELECT a.gid,
 	END, 3) geom, a.shape_area
 FROM proc1_03_is_premium a
 LEFT JOIN proc1_03_z1_car_intersects c ON c.gid = a.gid
-LEFT JOIN proc1_03_is_premium b ON c.gid2 = b.gid AND a.rnd > b.rnd AND b.fla_car_premium
+LEFT JOIN proc1_03_is_premium b ON c.gid2 = b.gid 
+AND (CASE (SELECT param_text param_priority FROM lt_model.params WHERE param_name = 'priority_autointersection')
+			WHEN 'S' THEN 
+				b.shape_area < a.shape_area 
+			WHEN 'L' THEN
+				b.shape_area > a.shape_area
+			ELSE
+				b.rnd < a.rnd
+		END)
+AND b.fla_car_premium
 WHERE a.fla_car_premium AND (a.gid % :var_num_proc) = :var_proc
 GROUP BY a.gid, a.geom, a.shape_area;
