@@ -3,9 +3,8 @@ userName=$1
 databaseServer=$2 
 databaseName=$3
 numProc=$4
-carTable=$5
-wait=$6
-specificProc=$7
+wait=$5
+specificProc=$6
 
 
 
@@ -14,7 +13,7 @@ specificProc=$7
 psql -U $userName -h $databaseServer -d $databaseName -c "UPDATE lt_model.params SET param_text = 'R' WHERE param_name = 'priority_autointersection'"
 
 #Run INCRA and CAR consistency
-./bash_03_run_all.sh $1 $2 $3 $4 $5 $6 $7
+./bash_03_run_all.sh $userName $databaseServer $databaseName $numProc $wait $specificProc
 
 
 #Rename proc1_12_car_cleaned to proc1_12_car_cleaned_random

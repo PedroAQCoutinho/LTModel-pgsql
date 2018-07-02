@@ -4,8 +4,7 @@ userName=$1
 databaseServer=$2 
 databaseName=$3
 numProc=$4
-carTable=$5
-wait=$6
+wait=$5
 
 if [ "$wait" == "" ]; then wait=false; fi
 
@@ -14,7 +13,7 @@ function waitAnyKey {
 }
 
 function runProc {
-  $curDir/bash_02_execproc.sh $userName $databaseServer $databaseName $1 $numProc $carTable
+  $curDir/bash_02_execproc.sh $userName $databaseServer $databaseName $1 $numProc
   if $wait; then waitAnyKey; fi
 }
 

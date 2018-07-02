@@ -10,9 +10,8 @@ userName=$1
 databaseServer=$2 
 databaseName=$3
 numProc=$4
-carTable=$5
-wait=$6
-specificProc=$7
+wait=$5
+specificProc=$6
 allProcs=(
     proc0_sigef_solve
     proc1_01_makevalid
@@ -32,7 +31,7 @@ allProcs=(
 found=false
 
 #Import auxiliary functions
-. $curDir/bash_01_helpers.sh $userName $databaseServer $databaseName $numProc $carTable $wait
+. $curDir/bash_01_helpers.sh $userName $databaseServer $databaseName $numProc $wait
 
 function finish {
     echo Started:
