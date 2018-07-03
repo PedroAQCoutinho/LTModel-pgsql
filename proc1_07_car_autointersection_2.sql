@@ -19,4 +19,4 @@ LEFT JOIN proc1_00_0makevalid c2 ON c1.gid != c2.gid AND ST_Intersects(c1.geom, 
 WHERE (c1.gid % :var_num_proc) = :var_proc
 GROUP BY c1.gid, c1.geom;
 
-RAISE NOTICE 'Finished proc: %', :var_proc
+SELECT 'Finished proc: ' || :var_proc;
