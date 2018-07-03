@@ -9,10 +9,10 @@ if [ "$wait" == "" ]; then wait=false; fi
 
 function renameAppendCarTables {
     appendSuffix=$1
-    psql -U $userName -h $databaseServer -d $databaseName -c "DROP TABLE IF EXISTS proc1_12_car_cleaned_$appendSuffix;ALTER TABLE lt_model.proc1_12_car_cleaned RENAME TO proc1_12_car_cleaned_$appendSuffix;"
+    psql -U $userName -h $databaseServer -d $databaseName -c "DROP TABLE IF EXISTS lt_model.proc1_12_car_cleaned_$appendSuffix;ALTER TABLE lt_model.proc1_12_car_cleaned RENAME TO proc1_12_car_cleaned_$appendSuffix;"
     #Create resulting lt_model_car_po and lt_model_car_pr tables
-    psql -U $userName -h $databaseServer -d $databaseName -c "DROP TABLE IF EXISTS lt_model_car_po_$appendSuffix;ALTER TABLE lt_model.lt_model_car_po RENAME TO lt_model_car_po_$appendSuffix"
-    psql -U $userName -h $databaseServer -d $databaseName -c "DROP TABLE IF EXISTS lt_model_car_pr_$appendSuffix; ALTER TABLE lt_model.lt_model_car_pr RENAME TO lt_model_car_pr_$appendSuffix"
+    psql -U $userName -h $databaseServer -d $databaseName -c "DROP TABLE IF EXISTS lt_model.lt_model_car_po_$appendSuffix;ALTER TABLE lt_model.lt_model_car_po RENAME TO lt_model_car_po_$appendSuffix"
+    psql -U $userName -h $databaseServer -d $databaseName -c "DROP TABLE IF EXISTS lt_model.lt_model_car_pr_$appendSuffix; ALTER TABLE lt_model.lt_model_car_pr RENAME TO lt_model_car_pr_$appendSuffix"
 }
 
 

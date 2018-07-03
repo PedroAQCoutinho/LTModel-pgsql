@@ -121,7 +121,7 @@ FROM (
 
 INSERT INTO lt_model.proc1_12_car_cleaned
 SELECT gid, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, shape_area area_original, ST_Perimeter(geom) perimeter, is_premium, geom
-FROM (SELECT gid, ST_CollectionExtract(ST_MakeValid(geom),3) geom, shape_area, area, area_original, is_premium FROM lt_model.proc1_07_car_solved
+FROM (SELECT gid, ST_CollectionExtract(ST_MakeValid(geom),3) geom, shape_area, is_premium FROM lt_model.proc1_07_car_solved
 WHERE is_premium) a;
 
 UPDATE lt_model.proc1_12_car_cleaned
