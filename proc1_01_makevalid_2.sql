@@ -12,4 +12,4 @@ SELECT
 	ST_CollectionExtract(ST_MakeValid(geom), 3) geom,
 	ST_IsValid(geom) is_valid
 FROM (SELECT gid, cod_imovel, ST_Transform(geom, 97823) geom FROM :"car_table_schema".:"car_table_name" b
-WHERE (gid % :var_num_proc) = :var_proc AND ST_Contains(ST_Transform(ST_MakeEnvelope(-180, -90, 180, 90, 4326), ST_SRID(geom)), geom)) a;
+WHERE (gid % :var_num_proc) = :var_proc AND ST_Contains(ST_MakeEnvelope(-180, -90, 180, 90, 4326), ST_Transform(geom, 4326))) a;
