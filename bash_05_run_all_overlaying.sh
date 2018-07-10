@@ -1,3 +1,12 @@
+userName=$1
+databaseServer=$2 
+databaseName=$3
+numProc=$4
+specificProc=$5
+wait=$6
+if [ "$wait" == "" ]; then wait=false; fi
+
+
 #Run overlaying rules
 function runOverlayingRules {
     priority=$1
