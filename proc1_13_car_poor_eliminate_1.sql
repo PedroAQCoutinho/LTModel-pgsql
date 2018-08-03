@@ -93,7 +93,17 @@ GROUP BY operation.id;
 -- Create temporary copy of CAR to be consolidated
 DROP TABLE IF EXISTS proc1_11_temp_car_consolidated;
 CREATE TABLE proc1_11_temp_car_consolidated AS
-SELECT *, false fla_multipolygon FROM proc1_09_car_single WHERE NOT fla_eliminate;
+SELECT 
+rid, 
+gid,
+area_original,
+fla_eliminate,
+area_loss,
+area,
+permiter,
+ci,
+ST_MakeValidSnapping(geom) geom, 
+false fla_multipolygon FROM proc1_09_car_single WHERE NOT fla_eliminate;
 
 DROP TABLE IF EXISTS temp_already_process CASCADE;
 CREATE TEMP TABLE temp_already_process(small INT);
