@@ -100,7 +100,7 @@ area_original,
 fla_eliminate,
 area_loss,
 area,
-permiter,
+perimiter,
 ci,
 geom geom, 
 false fla_multipolygon FROM proc1_09_car_single WHERE NOT fla_eliminate;
