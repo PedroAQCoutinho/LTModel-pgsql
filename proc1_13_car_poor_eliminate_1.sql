@@ -102,7 +102,7 @@ area_loss,
 area,
 permiter,
 ci,
-ST_MakeValidSnapping(geom) geom, 
+geom geom, 
 false fla_multipolygon FROM proc1_09_car_single WHERE NOT fla_eliminate;
 
 DROP TABLE IF EXISTS temp_already_process CASCADE;
