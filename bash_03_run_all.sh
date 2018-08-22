@@ -9,7 +9,7 @@ numProc=1
 portNumber=5432
 wait=false
 
-while getopts "U:p:h:d:j:w:" opt; do
+while getopts "U:p:h:d:j:w" opt; do
   case $opt in
     h) databaseServer=$OPTARG;;
     U) userName=$OPTARG;;
