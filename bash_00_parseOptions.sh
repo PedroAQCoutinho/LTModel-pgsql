@@ -20,11 +20,15 @@ done
 
 specificProc=${@:$OPTIND:1}
 invalid=${@:$OPTIND+1:1}
-
+[[ ! portNumber -gt 0 ]] && error=true
+[[ ! numProc -gt 0 ]] && error=true
 [[ ! -z "$invalid" ]] && error=true
 if [ $error == true ]
 then
-  echo "Usage: ./bash_04_run_all_3_models.sh [-U user] [-h host] [-p port] [-d database] [-j Number_of_jobs] proc_name_resume"
+  echo "Usage: ./bash_04_run_all_3_models.sh [-h host] [-p port] [-U user] [-d database] [-j Number_of_jobs] [proc_name_resume]" 
+  echo "Default values: host=127.0.0.1 port=5432 user=postgres database=atlas Number_of_jobs=1 proc_name_resume=" 
+  echo
+  echo "Remark: database must accept login without password: interactive session would not be suitable for this batch script."
   exit
 fi
 

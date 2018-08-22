@@ -2,28 +2,7 @@
 
 #Parameters
 curDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-userName=postgres
-databaseServer=127.0.0.1
-databaseName=atlas
-numProc=1
-portNumber=5432
-wait=false
-
-while getopts "U:p:h:d:j:w" opt; do
-  case $opt in
-    h) databaseServer=$OPTARG;;
-    U) userName=$OPTARG;;
-    p) portNumber=$OPTARG;;
-    d) databaseName=$OPTARG;;
-    j) numProc=$OPTARG;;
-    w) wait=true;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      ;;
-  esac
-done
-
-specificProc=${@:$OPTIND:1}
+. $curDir/bash_00_parseOptions.sh
 
 set -e
 start_date="$(date)"
@@ -51,7 +30,7 @@ allProcs=(
 found=false
 
 #Import auxiliary functions
-. $curDir/bash_01_helpers.sh $userName $databaseServer $databaseName $numProc $wait
+. $curDir/bash_01_helpers.sh -U $userName -h $databaseServer -d $databaseName -j $numProc $useWait
 
 function finish {
     echo Started:

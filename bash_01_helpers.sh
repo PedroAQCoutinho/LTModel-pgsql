@@ -1,11 +1,5 @@
 curDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-userName=$1
-databaseServer=$2 
-databaseName=$3
-numProc=$4
-wait=$5
-
 if [ "$wait" == "" ]; then wait=false; fi
 
 function waitAnyKey {
@@ -13,7 +7,7 @@ function waitAnyKey {
 }
 
 function runProc {
-  $curDir/bash_02_execproc.sh $userName $databaseServer $databaseName $1 $numProc
+  $curDir/bash_02_execproc.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber $1 $numProc
   if $wait; then waitAnyKey; fi
 }
 
