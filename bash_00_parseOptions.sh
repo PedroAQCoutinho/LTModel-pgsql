@@ -21,8 +21,8 @@ done
 specificProc=${@:$OPTIND:1}
 invalid=${@:$OPTIND+1:1}
 
-[[ ! -z "$invalid" ]] && error=true;;
-if [ $error ]
+[[ ! -z "$invalid" ]] && error=true
+if [ $error == true ]
 then
   echo "Usage: ./bash_04_run_all_3_models.sh [-U user] [-h host] [-p port] [-d database] [-j Number_of_jobs] proc_name_resume"
   exit
