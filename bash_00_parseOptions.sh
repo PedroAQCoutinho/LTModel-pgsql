@@ -6,6 +6,23 @@ portNumber=5432
 wait=false
 error=false
 
+if [ -n "${USER+1}" ]; then
+  userName=$USER
+fi
+
+if [ -n "${PGDATABASE+1}" ]; then
+  databaseName=$PGDATABASE
+fi
+
+if [ -n "${PGPORT+1}" ]; then
+  portNumber=$PGPORT
+fi
+
+if [ -n "${PGHOST+1}" ]; then
+  databaseServer=$PGHOST
+fi
+
+
 while getopts "U:p:h:d:j:w" opt; do
   case $opt in
     h) databaseServer=$OPTARG;;
