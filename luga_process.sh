@@ -27,7 +27,7 @@ renameAppendCarTables "random"
 #Set priority of CAR autointersection to Small ("S")
 psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -c "UPDATE lt_model.params SET param_text = 'S' WHERE param_name = 'priority_autointersection'"
 #Run INCRA and CAR consistency
-./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc  $useWait proc1_10_car_poor_clean
+./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc $useWait proc1_10_car_poor_clean
 #Rename proc1_12_car_cleaned to proc1_12_car_cleaned_small
 renameAppendCarTables "small"
 
@@ -35,9 +35,9 @@ renameAppendCarTables "small"
 #### PRIORITY LARGE ####
 #Set priority of CAR autointersection to Large ("L")
 psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -c "UPDATE lt_model.params SET param_text = 'L' WHERE param_name = 'priority_autointersection'"
-./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc  $useWait proc1_10_car_poor_clean
+./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numPro  $useWait proc1_10_car_poor_clean
 #Rename proc1_12_car_cleaned to proc1_12_car_cleaned_large
-renameAppendCarTables "small"
+renameAppendCarTables "large"
 
 
 #Run overlaying rules

@@ -7,7 +7,7 @@ function waitAnyKey {
 }
 
 function runProc {
-  $curDir/bash_02_execproc.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber $1 $numProc
+  $curDir/bash_02_execproc.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc $1
   if $wait; then waitAnyKey; fi
 }
 

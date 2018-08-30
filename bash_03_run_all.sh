@@ -30,6 +30,7 @@ allProcs=(
 found=false
 
 #Import auxiliary functions
+echo "Importing helpers"
 . $curDir/bash_01_helpers.sh -U $userName -h $databaseServer -d $databaseName -j $numProc $useWait
 
 function finish {
@@ -45,7 +46,9 @@ function finish {
 
 function runAll {
     for i in ${allProcs[@]}
-        do runProc $i
+        do 
+		echo "runProc $i"
+		runProc $i
     done
 }
 
@@ -65,4 +68,3 @@ if [ "$specificProc" == "" ]
         done;
 fi
 
-finish
