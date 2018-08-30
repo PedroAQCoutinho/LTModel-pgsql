@@ -7,7 +7,7 @@ INSERT INTO proc1_03_is_premium
   shape_area,
   shape_leng,
   area_loss,
-  new_area,
+  new_area,\
   fla_car_premium
 )
 SELECT 
@@ -27,30 +27,3 @@ SELECT a.*, ST_Area(ST_CollectionExtract(b.geom,3)) new_area
 FROM proc1_00_0makevalid a
 LEFT JOIN proc1_02_car_result b ON a.gid = b.gid
 WHERE (a.gid % :var_num_proc) = :var_proc) c;
-
-
-
-SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
-
-
--- log premium
-INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
-	SELECT currval('seq_current_run'),
-	operation.id,
-	COUNT(*),
-	SUM(shape_area)
-FROM log_operation operation,
-proc1_03_is_premium b
-WHERE operation.nom_operation = 'car_premium' AND fla_car_premium
-GROUP BY operation.id;
-
---log poor
-INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
-	SELECT currval('seq_current_run'),
-	operation.id,
-	COUNT(*),
-	SUM(shape_area)
-FROM log_operation operation,
-proc1_03_is_premium b
-WHERE operation.nom_operation = 'car_poor' AND NOT fla_car_premium
-GROUP BY operation.id;
