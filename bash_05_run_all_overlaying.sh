@@ -27,3 +27,5 @@ runOverlayingRules "small"
 
 ## Run and log for large
 runOverlayingRules "large"
+
+. $curDir/bash_06_add_names.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber
