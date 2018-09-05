@@ -7,7 +7,7 @@ INSERT INTO proc1_03_is_premium
   shape_area,
   shape_leng,
   area_loss,
-  new_area,\
+  new_area,
   fla_car_premium
 )
 SELECT 
