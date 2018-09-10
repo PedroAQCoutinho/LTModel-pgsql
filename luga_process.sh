@@ -41,4 +41,4 @@ renameAppendCarTables "large"
 
 
 #Run overlaying rules
-. $curDir/bash_05_run_all_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc  $useWait
+. $curDir/bash_05_run_all_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc $useWait
