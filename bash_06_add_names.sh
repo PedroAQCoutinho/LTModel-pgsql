@@ -8,7 +8,7 @@ IFS=,
 
 while read tableName columnName
 do
-    psql -v var_table=$tableName -v var_column=$columnName -U $userName -h $databaseServer -d $databaseName -p $portNumber -f proc2_get_nome_result.sql
+    psql -v var_table=$tableName -v var_column=$columnName -U $userName -h $databaseServer -d $databaseName -p $portNumber -f proc2_get_name_result.sql
 done < saida.csv
 
 rm saida.csv
