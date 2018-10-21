@@ -21,11 +21,5 @@ function runOverlayingRules {
 psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -t -c "SELECT lt_model.run_statement()" > run_stmt.sql
 
 ## Run overlaying rules for random
-runOverlayingRules "random"
-
-## Run and log for small
-runOverlayingRules "small"
-
-## Run and log for large
-runOverlayingRules "large"
+runOverlayingRules "${@:$OPTIND+1:1}"
 
