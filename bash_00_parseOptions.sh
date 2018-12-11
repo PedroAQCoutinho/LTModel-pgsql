@@ -5,6 +5,7 @@ numProc=1
 portNumber=5432
 wait=false
 error=false
+varPriority=random
 
 if [ -n "${USER+1}" ]; then
   userName=$USER
@@ -23,13 +24,14 @@ if [ -n "${PGHOST+1}" ]; then
 fi
 
 
-while getopts "U:p:h:d:j:w" opt; do
+while getopts "U:p:h:d:j:v:w" opt; do
   case $opt in
     h) databaseServer=$OPTARG;;
     U) userName=$OPTARG;;
     p) portNumber=$OPTARG;;
     d) databaseName=$OPTARG;;
     j) numProc=$OPTARG;;
+    v) varPriority=$OPTARG;;
     w) 
 	useWait="-w"
 	wait=true;;
