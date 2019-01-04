@@ -4,6 +4,7 @@
 curDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 . $curDir/bash_00_parseOptions.sh
 
+echo $varPriority
 #Run overlaying rules
 function runOverlayingRules {
     psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -c "ALTER TABLE lt_model.lt_model_car_po_$varPriority RENAME TO lt_model_car_po;"

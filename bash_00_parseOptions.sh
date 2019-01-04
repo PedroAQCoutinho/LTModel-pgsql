@@ -5,7 +5,7 @@ numProc=1
 portNumber=5432
 wait=false
 error=false
-varPriority=random
+varPriority=large
 
 if [ -n "${USER+1}" ]; then
   userName=$USER
