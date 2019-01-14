@@ -10,14 +10,14 @@ underline=_
 
 echo $varPriority
 carType=po
-psql -p $portNumber -c "TRUNCATE lt_model.lt_model_car_sim_$carType;INSERT INTO lt_model.lt_model_car_sim_$carType SELECT gid, gid gid2, area, area_loss, area_original, cod_imovel, is_premium, geom FROM lt_model.lt_model_car_${carType}_$varPriority";
+psql -p $portNumber -c "TRUNCATE lt_model.lt_model_car_sim_$carType;INSERT INTO lt_model.lt_model_car_sim_$carType SELECT gid, gid gid2, area, area_loss, area_original, cod_imovel, is_premium, geom FROM lt_model.lt_model_car_${carType}";
 carType=pr
-psql -p $portNumber -c "TRUNCATE lt_model.lt_model_car_sim_$carType;INSERT INTO lt_model.lt_model_car_sim_$carType SELECT gid, gid gid2, area, area_loss, area_original, cod_imovel, is_premium, geom FROM lt_model.lt_model_car_${carType}_$varPriority";
+psql -p $portNumber -c "TRUNCATE lt_model.lt_model_car_sim_$carType;INSERT INTO lt_model.lt_model_car_sim_$carType SELECT gid, gid gid2, area, area_loss, area_original, cod_imovel, is_premium, geom FROM lt_model.lt_model_car_${carType}";
 
 
 while read tableName columnName
 do
-    psql -v var_table=$tableName -v var_column=$columnName -v var_priority=$varPriority -U $userName -h $databaseServer -d $databaseName -p $portNumber -f proc2_get_name_result.sql
+    psql -v var_table=$tableName -v var_column=$columnName -U $userName -h $databaseServer -d $databaseName -p $portNumber -f proc2_get_name_result.sql
 done < saida.csv
 
 
