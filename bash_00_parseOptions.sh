@@ -2,10 +2,10 @@ userName=postgres
 databaseServer=127.0.0.1
 databaseName=atlas
 numProc=1
-portNumber=5432
+portNumber=5434
 wait=false
 error=false
-varPriority=large
+varPriority=random
 
 if [ -n "${USER+1}" ]; then
   userName=$USER

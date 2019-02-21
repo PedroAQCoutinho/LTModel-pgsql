@@ -16,20 +16,20 @@ function renameAppendCarTables {
 
 #### PRIORITY RANDOM ####
 #Set priority of CAR autointersection to Random ("R")
-psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -c "UPDATE lt_model.params SET param_text = 'R' WHERE param_name = 'priority_autointersection'"
+  #psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -c "UPDATE lt_model.params SET param_text = 'R' WHERE param_name = 'priority_autointersection'"
 #Run INCRA and CAR consistency
-./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc $useWait $specificProc
+  #./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc $useWait $specificProc
 #Rename appending random to results
-renameAppendCarTables "random"
+  #renameAppendCarTables "random"
 
 
 #### PRIORITY SMALL ####
 #Set priority of CAR autointersection to Small ("S")
-psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -c "UPDATE lt_model.params SET param_text = 'S' WHERE param_name = 'priority_autointersection'"
+  #psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -c "UPDATE lt_model.params SET param_text = 'S' WHERE param_name = 'priority_autointersection'"
 #Run INCRA and CAR consistency
-./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc $useWait proc1_10_car_poor_clean
+  #./bash_03_run_all.sh -U $userName -h $databaseServer -d $databaseName -p $portNumber -j $numProc $useWait proc1_10_car_poor_clean
 #Rename proc1_12_car_cleaned to proc1_12_car_cleaned_small
-renameAppendCarTables "small"
+  #renameAppendCarTables "small"
 
 
 #### PRIORITY LARGE ####
@@ -41,8 +41,8 @@ renameAppendCarTables "large"
 
 
 #Run overlaying rules
-#. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc $useWait random
+#. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc -v random $useWait 
 
-#. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc $useWait small
+#. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc -v small $useWait 
 
-#. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc $useWait large
+. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc -v large $useWait 

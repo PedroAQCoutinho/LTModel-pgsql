@@ -11,5 +11,5 @@ pg_ctl -D ~/BDs/db  start
 cd /home/atlas/codigos/LTModel-pgsql
 
 #Não se esqueça de conferir o conteúdo do arquivo script.R
-./luga_process.sh -j 56 > runAll_2019.log 2>&1
+./luga_process.sh -j 56 > runAll_2019_large.log 2>&1
 pg_ctl -D ~/BDs/db  stop
