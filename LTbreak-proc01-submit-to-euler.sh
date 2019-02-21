@@ -15,12 +15,12 @@ module load gcc openmpi
 pg_ctl start -D ~/BDs/db/
 
 #Cria as bases de dados
-psql -h 127.0.0.1 -U atlas -d atlas -a -f LTbreak_proc00-creating-tables.sql > LTbreak-log-output 2>&1
+psql -h 127.0.0.1 -U atlas -d atlas -p 5434 -a -f LTbreak_proc00-creating-tables.sql > LTbreak-log-output 2>&1
 
 #Roda o processamento em paralelo
 export OMP_NUM_THREADS=1
 export NCPUS=$(qstat -fx $PBS_JOBID | grep "resources_used.ncpus" | tr -dc '0-9')
-mpirun -np $NCPUS --hostfile $PBS_NODEFILE -x PATH -x LD_LIBRARY_PATH ./LTbreak-proc02-call-sql-scripts-euler.sh $NCPUS >> log-ltbreak 2>&1
+mpirun -np $NCPUS --hostfile $PBS_NODEFILE -x PATH -x LD_LIBRARY_PATH ./LTbreak-proc02-call-sql-scripts-euler.sh $NCPUS result_random_v201901 >> log-ltbreak 2>&1
 
 #Da o stop na base de dados
 pg_ctl stop -D ~/BDs/db/
