@@ -1,4 +1,4 @@
--- CONFIGURAÇÕES --
+-- CONFIGURAï¿½ï¿½ES --
 
 -- Definindo tabela de inputs com nova hierarquia
 create table lt_model.inputs_carocf as (select * from lt_model.inputs);
@@ -35,7 +35,7 @@ update lt_model.params_carocf
 set param_text = 'input_acervofundiario_sigef_particular_2018_incra_null' where id = 17;
 
 update lt_model.params_carocf
-set param_text = 'input_car_pct_20180901_sfb' where id = 26;
+set param_text = 'input_car_iru_20180901_sfb' where id = 26;
 
 update lt_model.params_carocf
 set param_text = 'lt_model' where id = 27;
@@ -51,7 +51,7 @@ create table lt_model.input_acervofundiario_snci_particular_2018_incra_null AS (
 create table lt_model.input_acervofundiario_sigef_particular_2018_incra_null AS (select * from lt_model.input_acervofundiario_sigef_particular_2018_incra limit 0);
 
 --PROC01--
--- Separação dos polígonos de cada tipo (IRU, AST, PCT)
+-- Separaï¿½ï¿½o dos polï¿½gonos de cada tipo (IRU, AST, PCT)
 CREATE TABLE ocf.input_car_iru_20180901_sfb AS (
 	SELECT * FROM ocf.input_pa_br_areaimovel_20180901_sfb
 	WHERE tipo = 'IRU'
@@ -69,7 +69,7 @@ CREATE TABLE ocf.input_car_pct_20180901_sfb  AS (
 ----------
 
 --PROC03--
--- Marcação dos polígonos com geometria idêntica
+-- Marcaï¿½ï¿½o dos polï¿½gonos com geometria idï¿½ntica
 DROP TABLE IF EXISTS ocf.car_clean_proc03_ast_equalshape;
 CREATE TABLE ocf.car_clean_proc03_ast_equalshape AS (
  SELECT a.gid 
@@ -84,7 +84,7 @@ CREATE TABLE ocf.car_clean_proc03_ast_equalshape AS (
   ST_Equals(a.geom,b.geom))
 );
 
--- Marcação dos polígonos inteiramente sobrepostos
+-- Marcaï¿½ï¿½o dos polï¿½gonos inteiramente sobrepostos
 DROP TABLE IF EXISTS ocf.car_clean_proc03_ast_withinshape;
 CREATE TABLE ocf.car_clean_proc03_ast_withinshape AS (
   SELECT b.gid
@@ -107,7 +107,7 @@ CREATE TABLE ocf.temp_car_clean_proc03_ast_excludelist_1 AS (
 	SELECT gid FROM ocf.car_clean_proc03_ast_withinshape
 );
 
--- Marcação dos polígonos com mais de 75% de sobreposição
+-- Marcaï¿½ï¿½o dos polï¿½gonos com mais de 75% de sobreposiï¿½ï¿½o
 DROP TABLE IF EXISTS ocf.car_clean_proc03_ast_overlapshape;
 CREATE TABLE ocf.car_clean_proc03_ast_overlapshape AS (
 	SELECT DISTINCT ON (gid)
@@ -141,14 +141,14 @@ CREATE TABLE ocf.temp_car_clean_proc03_ast_excludelist_2 AS (
 	SELECT gid FROM ocf.car_clean_proc03_ast_overlapshape
 );
 
--- Limpeza temporária da base original a partir da marcação dos polígonos
+-- Limpeza temporï¿½ria da base original a partir da marcaï¿½ï¿½o dos polï¿½gonos
 DROP TABLE IF EXISTS ocf.temp_input_car_ast_20180901_sfb_cleaned;
 CREATE TABLE ocf.temp_input_car_ast_20180901_sfb_cleaned AS (
  SELECT * FROM ocf.input_car_ast_20180901_sfb 
  WHERE gid NOT IN (SELECT gid FROM ocf.temp_car_clean_proc03_ast_excludelist_2 WHERE gid IS NOT NULL)
 );
 
--- Marcação dos polígonos com mais de uma sobreposição
+-- Marcaï¿½ï¿½o dos polï¿½gonos com mais de uma sobreposiï¿½ï¿½o
 DROP TABLE IF EXISTS ocf.car_clean_proc03_ast_overlaps_shapes;
 CREATE TABLE ocf.car_clean_proc03_ast_overlaps_shapes AS (
 	SELECT DISTINCT ON (gid)
@@ -174,7 +174,7 @@ CREATE TABLE ocf.temp_car_clean_proc03_ast_excludelist_3 AS (
 	SELECT gid FROM ocf.car_clean_proc03_ast_overlaps_shapes
 );
 
--- Limpeza final da base original a partir da marcação dos polígonos
+-- Limpeza final da base original a partir da marcaï¿½ï¿½o dos polï¿½gonos
 DROP TABLE IF EXISTS ocf.input_car_ast_20180901_sfb_cleaned;
 CREATE TABLE ocf.input_car_ast_20180901_sfb_cleaned AS (
  SELECT * FROM ocf.input_car_ast_20180901_sfb 
@@ -182,7 +182,7 @@ CREATE TABLE ocf.input_car_ast_20180901_sfb_cleaned AS (
 );
 
 
--- Exclusão das tabelas temporárias
+-- Exclusï¿½o das tabelas temporï¿½rias
 DROP TABLE ocf.temp_car_clean_proc03_ast_excludelist_1;
 DROP TABLE ocf.temp_car_clean_proc03_ast_excludelist_2;
 DROP TABLE ocf.temp_car_clean_proc03_ast_excludelist_3;
