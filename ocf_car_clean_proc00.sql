@@ -9,13 +9,15 @@ where proc_order NOT IN (100,200,800,1100,1105);
 update lt_model.inputs_carocf
 set table_name = 'input_car_pct_20180901_sfb',
 	layer_name = 'Imoveis do CAR do tipo PCT',
-	fla_proc = TRUE
+	fla_proc = TRUE,
+  column_name = 'cod_imovel'
 where proc_order = 200; 
 
 update lt_model.inputs_carocf
 set table_name = 'input_car_ast_20180901_sfb_cleaned',
 	layer_name = 'Imoveis do CAR do tipo AST',
-	fla_proc = TRUE
+	fla_proc = TRUE,
+  column_name = 'cod_imovel'
 where proc_order = 800; 
 
 ALTER TABLE lt_model.inputs
