@@ -1,6 +1,6 @@
-/*SET search_path TO lt_model, public;
+SET search_path TO lt_model, public;
 
-INSERT INTO proc1_03_is_premium 
+/*INSERT INTO proc1_03_is_premium 
 (
   gid,
   geom,

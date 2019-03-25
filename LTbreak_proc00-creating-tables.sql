@@ -1,42 +1,47 @@
---Table with unregistred lands
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc01_unregistered; 
-CREATE TABLE lt_model.v_pacotes_proc01_unregistered
+--Breaking municipalities by biome
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc01_breakbiome; 
+CREATE TABLE lt_model.v_pacotes_proc01_breakbiome
 (
-  gid integer,
   cd_mun integer,
-  geom geometry
-);
-
---Table with rural properties and unregistred lands
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc02_imoveisfull; 
-CREATE TABLE lt_model.v_pacotes_proc02_imoveisfull
-(
-  gid integer,
-  geom geometry
-);
-
---Table with municipalities breaks
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc03_breakmun; 
-CREATE TABLE lt_model.v_pacotes_proc03_breakmun
-(
-  gid integer,
-  cd_mun bigint,
-  geom geometry
-);
-
---Table with biomes breaks
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc04_breakbiome;
-CREATE TABLE lt_model.v_pacotes_proc04_breakbiome
-(
-  gid integer,
-  cd_mun bigint,
   cd_bioma integer,
   geom geometry
 );
 
---Table with watershed breaks
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc05_ottobacia;
-CREATE TABLE lt_model.v_pacotes_proc05_ottobacia
+--Breaking municipalities+biome by ottobacia
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc02_ottobacia;
+CREATE TABLE lt_model.v_pacotes_proc02_ottobacia
+(
+  cd_mun bigint,
+  cd_bioma integer,
+  cd_bacia character varying(14),
+  geom geometry
+);
+
+--Table with rural properties and unregistred lands
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc03_unregistered; 
+CREATE TABLE lt_model.v_pacotes_proc03_unregistered
+(
+  gid integer,
+  cd_mun bigint,
+  cd_bioma integer,
+  cd_bacia character varying(14),
+  geom geometry
+);
+
+--Table with rural properties breaks
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc04_flagprop; 
+CREATE TABLE lt_model.v_pacotes_proc04_flagprop
+(
+  gid integer,
+  cd_mun bigint,
+  cd_bioma integer,
+  cd_bacia character varying(14),
+  geom geometry
+);
+
+--Table with final dataset
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc05_imoveisfull; 
+CREATE TABLE lt_model.v_pacotes_proc05_imoveisfull
 (
   gid integer,
   cd_mun bigint,
