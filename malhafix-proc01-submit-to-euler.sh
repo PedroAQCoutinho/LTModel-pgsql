@@ -5,9 +5,12 @@
 #PBS -l walltime=120:00:00
 #PBS -q atlas
 
+
 #Parametro que indica a versão da malha fundiária
 #                     --------------- IMPORTANTE -------------------
 #EX: qsub malhafix-proc01-submit-to-euler.sh -v ltenure=result_random_v201901
+
+
 
 cdmun=_cdmun
 ltenure_cdmun=$ltenure$cdmun

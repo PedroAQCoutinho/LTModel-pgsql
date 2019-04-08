@@ -1,8 +1,8 @@
-userName=postgres
+userName=atlas
 databaseServer=127.0.0.1
 databaseName=atlas
 numProc=1
-portNumber=5434
+portNumber=5432
 wait=false
 error=false
 varPriority=random

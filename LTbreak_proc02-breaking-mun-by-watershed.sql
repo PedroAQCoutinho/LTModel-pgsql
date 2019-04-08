@@ -9,7 +9,7 @@ INSERT INTO lt_model.v_pacotes_proc02_ottobacia
             ELSE ST_Intersection(ST_Buffer(a.geom,0.0001),ST_Buffer(b.geom,0.0001)) 
         END AS geom
     FROM lt_model.v_pacotes_proc01_breakbiome AS a
-    JOIN lt_model.aux_ottobacias_nv12_ana AS b
+    JOIN lt_model.aux_ottobacias_multiescalas_2017_ana AS b
         ON ST_Intersects(a.geom,b.geom)
     WHERE a.cd_mun % :threads = :var_proc;
 
