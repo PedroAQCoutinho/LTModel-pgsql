@@ -47,3 +47,5 @@ function renameAppendCarTables {
 #. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc -v small $useWait 
 
 #. $curDir/bash_05_run_overlaying.sh -U $userName -h $databaseServer -d $databaseName -j $numProc -v large $useWait 
+
+#Adding cdmun to result
