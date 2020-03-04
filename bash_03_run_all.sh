@@ -17,6 +17,7 @@ allProcs=(
     proc1_02_outsidebr
     proc1_03_cleanequalshape
     proc1_04_cleansamecar
+    proc1_06_car_intersects
     proc1_07_car_autointersection
     proc1_08_car_premium
     proc1_09_car_intersects

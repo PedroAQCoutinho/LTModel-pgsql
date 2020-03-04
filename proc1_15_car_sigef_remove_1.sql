@@ -6,6 +6,7 @@ FROM lt_model.proc1_13_car_sigef WHERE area_loss < (SELECT param_value FROM lt_m
 
 \copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_table_schema') TO 'var1.txt' CSV header;
 \copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_table_name') TO 'var2.txt' CSV header;
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_mf_column') TO 'var3.txt' CSV header;
 \set car_table_schema `tail -1 var1.txt`
 \set car_table_name `tail -1 var2.txt`
 
@@ -20,6 +21,7 @@ WHERE a.gid = b.gid;
 
 \echo `rm var1.txt`
 \echo `rm var2.txt`
+\echo `rm var3.txt`
 
 DROP TABLE IF EXISTS lt_model.lt_model_car_po;
 CREATE TABLE lt_model.lt_model_car_po AS
