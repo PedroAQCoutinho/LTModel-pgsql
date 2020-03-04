@@ -1,5 +1,9 @@
 SET search_path TO lt_model, public;
 
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_table_schema') TO 'var1.txt' CSV header;
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_table_name') TO 'var2.txt' CSV header;
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_mf_column') TO 'var3.txt' CSV header;
+
 -- DROP VIEW IF EXISTS projetos_2017.malha_relatorio_01_car_bruto_eliminate;
 DROP TABLE IF EXISTS proc1_03_is_premium;
 CREATE TABLE proc1_03_is_premium
