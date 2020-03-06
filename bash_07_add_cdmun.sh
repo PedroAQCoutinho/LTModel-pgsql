@@ -5,6 +5,8 @@ proc=(
   proc3_inserting_cdmun
 )
 
+echo proc_07_add_cdmun
+
 for i in ${allProcs[@]}
   do 
     echo "runProc $i"

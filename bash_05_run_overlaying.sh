@@ -4,6 +4,7 @@
 curDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 . $curDir/bash_00_parseOptions.sh
 
+echo proc_05_run_overlaying
 echo $varPriority
 #Run overlaying rules
 function runOverlayingRules {

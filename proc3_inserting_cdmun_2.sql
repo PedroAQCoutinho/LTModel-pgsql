@@ -1,3 +1,4 @@
+\set mun_table_name `tail -1 var4.txt`
 --------------------------------------------------------
 -- INSERTING THE IBGE CODE FOR EACH RURAL PROPERTY
 
@@ -9,7 +10,7 @@ INSERT INTO lt_model.result_cdmun (gid, cd_mun_contain, cd_mun)
     TRUE,
 		b.cd_mun
 	FROM lt_model.result AS a
-	JOIN lt_model.aux_pa_br_municipios_5570 AS b
+	JOIN lt_model.:"mun_table_name" AS b
 		ON ST_CoveredBy(a.geom, b.geom)
 	WHERE (a.gid % :threads) = :var_proc;
 
@@ -26,7 +27,7 @@ INSERT INTO lt_model.result_cdmun (gid, cd_mun_contain, cd_mun)
 			b.cd_mun,
      SUM(ST_Area(ST_Intersection(ST_MakeValid(ST_Buffer(a.geom,0.001)),ST_MakeValid(ST_Buffer(b.geom,0.001))))) AS area_muns
 		FROM lt_model.result AS a
-	JOIN lt_model.aux_pa_br_municipios_5570 AS b
+	JOIN lt_model.:"mun_table_name" AS b
 			ON ST_Intersects(a.geom, b.geom) AND NOT ST_CoveredBy(a.geom, b.geom)
 		GROUP BY a.gid,b.cd_mun) AS sub
 	WHERE (sub.id_imovel % :threads) = :var_proc

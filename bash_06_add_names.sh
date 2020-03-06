@@ -8,6 +8,7 @@ IFS=,
 
 underline=_
 
+echo proc_06_add_names
 echo $varPriority
 carType=po
 psql -p $portNumber -c "TRUNCATE lt_model.lt_model_car_sim_$carType;INSERT INTO lt_model.lt_model_car_sim_$carType SELECT gid, gid gid2, area, area_loss, area_original, cod_imovel, is_premium, geom FROM lt_model.lt_model_car_${carType}";
