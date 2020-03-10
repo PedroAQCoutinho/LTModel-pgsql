@@ -34,7 +34,7 @@ CREATE TABLE lt_model.log_outputs
   val_area numeric,
   CONSTRAINT log_outputs_pkey PRIMARY KEY (id),
   CONSTRAINT log_outputs_fk_operation_fkey FOREIGN KEY (fk_operation)
-      REFERENCES lt_model_old.log_operation (id) MATCH SIMPLE
+      REFERENCES lt_model.log_operation (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
