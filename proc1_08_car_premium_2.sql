@@ -4,6 +4,13 @@ SET search_path TO lt_model, public;
 \set car_table_name `tail -1 var2.txt`
 \set car_mf_column `tail -1 var3.txt`
 
+\set car_premium_overlap_tolerance_p `tail -1 var7.txt`
+\set car_premium_overlap_tolerance_m `tail -1 var8.txt`
+\set car_premium_overlap_tolerance_g `tail -1 var9.txt`
+\set car_premium_overlap_count_p `tail -1 var10.txt`
+\set car_premium_overlap_count_m `tail -1 var11.txt`
+\set car_premium_overlap_count_g `tail -1 var12.txt`
+
 INSERT INTO proc1_03_is_premium 
 (
   gid,
@@ -22,9 +29,9 @@ SELECT
   shape_area-new_area area_loss,
   new_area,
 	CASE WHEN new_area IS NULL THEN FALSE 
-        WHEN num_modulo <= 4 AND (new_area/shape_area) >= 0.90 AND count_overlap <= 3 THEN TRUE
-        WHEN num_modulo <= 15 AND (new_area/shape_area) >= 0.97 AND count_overlap <= 5 THEN TRUE
-        WHEN num_modulo > 15 AND (new_area/shape_area) >= 0.99 AND count_overlap <= 7 THEN TRUE
+        WHEN num_modulo <= 4 AND (new_area/shape_area) >= :"car_premium_overlap_tolerance_p" AND count_overlap <= :"car_premium_overlap_count_p" THEN TRUE
+        WHEN num_modulo <= 15 AND (new_area/shape_area) >= :"car_premium_overlap_tolerance_m" AND count_overlap <= :"car_premium_overlap_count_m" THEN TRUE
+        WHEN num_modulo > 15 AND (new_area/shape_area) >= :"car_premium_overlap_tolerance_g" AND count_overlap <= :"car_premium_overlap_count_g" THEN TRUE
         ELSE FALSE
 	END fla_car_premium
 FROM (

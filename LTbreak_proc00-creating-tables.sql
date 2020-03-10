@@ -1,3 +1,7 @@
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'mun_table_name') TO 'var4.txt' CSV header;
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'biome_table_name') TO 'var5.txt' CSV header;
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'otto_table_name') TO 'var6.txt' CSV header;
+
 --Breaking municipalities by biome
 DROP TABLE IF EXISTS lt_model.v_pacotes_proc01_breakbiome; 
 CREATE TABLE lt_model.v_pacotes_proc01_breakbiome
