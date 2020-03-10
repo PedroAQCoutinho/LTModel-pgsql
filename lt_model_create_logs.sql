@@ -1,4 +1,4 @@
-CREATE TABLE lt_model_old.log_erros
+CREATE TABLE lt_model.log_erros
 (
   geom1 geometry,
   geom2 geometry
@@ -6,11 +6,11 @@ CREATE TABLE lt_model_old.log_erros
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model_old.log_erros
+ALTER TABLE lt_model.log_erros
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model_old.log_erros TO atlas;
+GRANT ALL ON TABLE lt_model.log_erros TO atlas;
 
-CREATE TABLE lt_model_old.log_operation
+CREATE TABLE lt_model.log_operation
 (
   id serial NOT NULL,
   nom_operation text,
@@ -21,11 +21,11 @@ CREATE TABLE lt_model_old.log_operation
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model_old.log_operation
+ALTER TABLE lt_model.log_operation
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model_old.log_operation TO atlas;
+GRANT ALL ON TABLE lt_model.log_operation TO atlas;
 
-CREATE TABLE lt_model_old.log_outputs
+CREATE TABLE lt_model.log_outputs
 (
   id serial NOT NULL,
   num_run integer,
@@ -40,11 +40,11 @@ CREATE TABLE lt_model_old.log_outputs
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model_old.log_outputs
+ALTER TABLE lt_model.log_outputs
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model_old.log_outputs TO atlas;
+GRANT ALL ON TABLE lt_model.log_outputs TO atlas;
 
-CREATE TABLE lt_model_old.log_simulate
+CREATE TABLE lt_model.log_simulate
 (
   num_run integer,
   cod_state smallint,
@@ -59,6 +59,6 @@ CREATE TABLE lt_model_old.log_simulate
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model_old.log_simulate
+ALTER TABLE lt_model.log_simulate
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model_old.log_simulate TO atlas;
+GRANT ALL ON TABLE lt_model.log_simulate TO atlas;
