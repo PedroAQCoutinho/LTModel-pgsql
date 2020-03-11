@@ -37,14 +37,14 @@ SELECT rid, original_gid, cod, original_area, area1, ST_Area(geom) area2, cert_d
 (SELECT a.rid, a.original_gid, a.cod, a.original_area, a.new_area area1, a.cert_date, a.area_loss, a.is_law2001, MAX(b.is_law2001::int) IS NOT NULL does_overlay,
 	CASE COUNT(b.rid) 
 		WHEN 0 THEN 
-			a.geom
+			ST_Force2d(a.geom)
 		WHEN 1 THEN
-			ST_Difference(a.geom, ST_GeometryN(ST_Collect(b.geom), 1))
+			ST_Difference(ST_Force2d(a.geom), ST_GeometryN(ST_Collect(ST_Force2d(b.geom)), 1))
 		ELSE
-			ST_Difference(a.geom, ST_Buffer(ST_MakeValid(ST_Collect(b.geom)), 0))
+			ST_Difference(ST_Force2d(a.geom), ST_Buffer(ST_MakeValid(ST_Collect(ST_Force2d(b.geom))), 0))
 		END geom
 FROM proc0_03_sigef_union a
-LEFT JOIN proc0_03_sigef_union b ON a.rid <> b.rid AND b.cert_date > a.cert_date AND ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom)
+LEFT JOIN proc0_03_sigef_union b ON a.rid <> b.rid AND b.cert_date > a.cert_date AND ST_Intersects(ST_Force2d(a.geom), ST_Force2d(b.geom)) AND NOT ST_Touches(a.geom, b.geom)
 GROUP BY a.rid, a.original_gid, a.cod, a.original_area, a.new_area, a.cert_date, a.area_loss, a.geom, a.is_law2001) c;
 
 CREATE INDEX gix_sigef_solved ON proc0_04_sigef_solved USING GIST (geom);
