@@ -45,6 +45,6 @@ LEFT JOIN lt_model.proc1_02_car_result b
     ON a.gid = b.gid
 LEFT JOIN :"car_table_schema".:"car_table_name" d
     ON a.gid = d.gid
-LEFT JOIN (SELECT gid, COUNT(DISTINCT gid2) AS count_overlap FROM lt_model.aux_proc1_03_z0_car_intersects GROUP BY gid) e
+LEFT JOIN (SELECT gid, COUNT(DISTINCT gid2) AS count_overlap FROM lt_model.proc1_03_z0_car_intersects GROUP BY gid) e
     ON a.gid = e.gid
 WHERE (a.gid % :var_num_proc) = :var_proc) c;
