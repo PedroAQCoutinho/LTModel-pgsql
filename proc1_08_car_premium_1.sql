@@ -4,13 +4,6 @@ SET search_path TO lt_model, public;
 \copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_table_name') TO 'var2.txt' CSV header;
 \copy (SELECT param_text FROM lt_model.params WHERE param_name = 'car_mf_column') TO 'var3.txt' CSV header;
 
-\copy (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_tolerance_p') TO 'var7.txt' CSV header;
-\copy (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_tolerance_m') TO 'var8.txt' CSV header;
-\copy (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_tolerance_g') TO 'var9.txt' CSV header;
-\copy (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_count_p') TO 'var10.txt' CSV header;
-\copy (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_count_m') TO 'var11.txt' CSV header;
-\copy (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_count_g') TO 'var12.txt' CSV header;
-
 -- DROP VIEW IF EXISTS projetos_2017.malha_relatorio_01_car_bruto_eliminate;
 DROP TABLE IF EXISTS proc1_03_is_premium;
 CREATE TABLE proc1_03_is_premium

@@ -29,9 +29,9 @@ SELECT
   shape_area-new_area area_loss,
   new_area,
 	CASE WHEN new_area IS NULL THEN FALSE 
-        WHEN num_modulo <= 4 AND (new_area/shape_area) >= :"car_premium_overlap_tolerance_p" AND count_overlap <= :"car_premium_overlap_count_p" THEN TRUE
-        WHEN num_modulo <= 15 AND (new_area/shape_area) >= :"car_premium_overlap_tolerance_m" AND count_overlap <= :"car_premium_overlap_count_m" THEN TRUE
-        WHEN num_modulo > 15 AND (new_area/shape_area) >= :"car_premium_overlap_tolerance_g" AND count_overlap <= :"car_premium_overlap_count_g" THEN TRUE
+        WHEN num_modulo <= 4 AND (new_area/shape_area) >= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_tolerance_p') AND count_overlap <= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_count_p') THEN TRUE
+        WHEN num_modulo <= 15 AND (new_area/shape_area) >= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_tolerance_m') AND count_overlap <= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_count_m') THEN TRUE
+        WHEN num_modulo > 15 AND (new_area/shape_area) >= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_tolerance_g') AND count_overlap <= (SELECT param_value FROM lt_model.params WHERE param_name = 'car_premium_overlap_count_g') THEN TRUE
         ELSE FALSE
 	END fla_car_premium
 FROM (

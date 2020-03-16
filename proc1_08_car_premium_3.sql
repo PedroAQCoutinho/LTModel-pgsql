@@ -27,9 +27,3 @@ GROUP BY operation.id;
 \echo `rm var1.txt`
 \echo `rm var2.txt` 
 \echo `rm var3.txt` 
-\echo `rm var7.txt` 
-\echo `rm var8.txt` 
-\echo `rm var9.txt` 
-\echo `rm var10.txt` 
-\echo `rm var11.txt` 
-\echo `rm var12.txt` 
