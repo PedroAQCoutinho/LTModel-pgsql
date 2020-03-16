@@ -4,13 +4,6 @@ SET search_path TO lt_model, public;
 \set car_table_name `tail -1 var2.txt`
 \set car_mf_column `tail -1 var3.txt`
 
-\set car_premium_overlap_tolerance_p `tail -1 var7.txt`
-\set car_premium_overlap_tolerance_m `tail -1 var8.txt`
-\set car_premium_overlap_tolerance_g `tail -1 var9.txt`
-\set car_premium_overlap_count_p `tail -1 var10.txt`
-\set car_premium_overlap_count_m `tail -1 var11.txt`
-\set car_premium_overlap_count_g `tail -1 var12.txt`
-
 INSERT INTO proc1_03_is_premium 
 (
   gid,
