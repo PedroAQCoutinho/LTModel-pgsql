@@ -38,7 +38,7 @@ FROM (
 SELECT
     a.*,
     ST_Area(ST_CollectionExtract(b.geom,3)) new_area,
-    d.:"car_mf_column" num_modulo,
+    d.:"car_mf_column"::numeric num_modulo,
     e.count_overlap
 FROM lt_model.proc1_00_0makevalid a
 LEFT JOIN lt_model.proc1_02_car_result b
