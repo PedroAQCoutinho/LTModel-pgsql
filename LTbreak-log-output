@@ -1,0 +1,1425 @@
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'mun_table_name') TO 'var4.txt' CSV header;
+COPY 1
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'biome_table_name') TO 'var5.txt' CSV header;
+COPY 1
+\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'otto_table_name') TO 'var6.txt' CSV header;
+COPY 1
+
+--Breaking municipalities by biome
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc01_breakbiome; 
+DROP TABLE
+CREATE TABLE lt_model.v_pacotes_proc01_breakbiome
+(
+  cd_mun integer,
+  cd_bioma integer,
+  geom geometry
+);
+CREATE TABLE
+
+--Breaking municipalities+biome by ottobacia
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc02_ottobacia;
+DROP TABLE
+CREATE TABLE lt_model.v_pacotes_proc02_ottobacia
+(
+  cd_mun bigint,
+  cd_bioma integer,
+  cd_bacia character varying(14),
+  geom geometry
+);
+CREATE TABLE
+
+--Table with rural properties and unregistred lands
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc03_unregistered; 
+DROP TABLE
+CREATE TABLE lt_model.v_pacotes_proc03_unregistered
+(
+  gid integer,
+  cd_mun bigint,
+  cd_bioma integer,
+  cd_bacia character varying(14),
+  geom geometry
+);
+CREATE TABLE
+
+--Table with rural properties breaks
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc04_flagprop; 
+DROP TABLE
+CREATE TABLE lt_model.v_pacotes_proc04_flagprop
+(
+  gid integer,
+  cd_mun bigint,
+  cd_bioma integer,
+  cd_bacia character varying(14),
+  geom geometry
+);
+CREATE TABLE
+
+--Table with final dataset
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc05_imoveisfull; 
+DROP TABLE
+CREATE TABLE lt_model.v_pacotes_proc05_imoveisfull
+(
+  gid integer,
+  cd_mun bigint,
+  cd_bioma integer,
+  cd_bacia character varying(14),
+  geom geometry
+);
+CREATE TABLE
+ num_proc 
+----------
+       22
+(1 row)
+
+ num_proc 
+----------
+       23
+(1 row)
+
+ num_proc 
+----------
+       24
+(1 row)
+
+ num_proc 
+----------
+       25
+(1 row)
+
+ num_proc 
+----------
+       26
+(1 row)
+
+ num_proc 
+----------
+       27
+(1 row)
+
+ num_proc 
+----------
+       28
+(1 row)
+
+ num_proc 
+----------
+       29
+(1 row)
+
+ num_proc 
+----------
+       30
+(1 row)
+
+ num_proc 
+----------
+       31
+(1 row)
+
+ num_proc 
+----------
+       32
+(1 row)
+
+ num_proc 
+----------
+       33
+(1 row)
+
+ num_proc 
+----------
+       34
+(1 row)
+
+ num_proc 
+----------
+       35
+(1 row)
+
+ num_proc 
+----------
+       36
+(1 row)
+
+ num_proc 
+----------
+       37
+(1 row)
+
+ num_proc 
+----------
+       38
+(1 row)
+
+ num_proc 
+----------
+       39
+(1 row)
+
+ num_proc 
+----------
+       40
+(1 row)
+
+ num_proc 
+----------
+       41
+(1 row)
+
+ num_proc 
+----------
+       42
+(1 row)
+
+ num_proc 
+----------
+       43
+(1 row)
+
+ num_proc 
+----------
+       44
+(1 row)
+
+ num_proc 
+----------
+       45
+(1 row)
+
+ num_proc 
+----------
+       46
+(1 row)
+
+ num_proc 
+----------
+       47
+(1 row)
+
+ num_proc 
+----------
+        0
+(1 row)
+
+ num_proc 
+----------
+        1
+(1 row)
+
+ num_proc 
+----------
+        2
+(1 row)
+
+ num_proc 
+----------
+        3
+(1 row)
+
+ num_proc 
+----------
+        4
+(1 row)
+
+ num_proc 
+----------
+        5
+(1 row)
+
+ num_proc 
+----------
+        6
+(1 row)
+
+ num_proc 
+----------
+        7
+(1 row)
+
+ num_proc 
+----------
+        8
+(1 row)
+
+ num_proc 
+----------
+        9
+(1 row)
+
+ num_proc 
+----------
+       10
+(1 row)
+
+ num_proc 
+----------
+       11
+(1 row)
+
+ num_proc 
+----------
+       12
+(1 row)
+
+ num_proc 
+----------
+       13
+(1 row)
+
+ num_proc 
+----------
+       14
+(1 row)
+
+ num_proc 
+----------
+       15
+(1 row)
+
+ num_proc 
+----------
+       16
+(1 row)
+
+ num_proc 
+----------
+       17
+(1 row)
+
+ num_proc 
+----------
+       18
+(1 row)
+
+ num_proc 
+----------
+       19
+(1 row)
+
+ num_proc 
+----------
+       20
+(1 row)
+
+ num_proc 
+----------
+       21
+(1 row)
+
+ num_proc 
+----------
+       48
+(1 row)
+
+ num_proc 
+----------
+       49
+(1 row)
+
+ num_proc 
+----------
+       50
+(1 row)
+
+ num_proc 
+----------
+       51
+(1 row)
+
+ num_proc 
+----------
+       52
+(1 row)
+
+ num_proc 
+----------
+       53
+(1 row)
+
+ num_proc 
+----------
+       54
+(1 row)
+
+ num_proc 
+----------
+       55
+(1 row)
+
+INSERT 0 100
+ num_proc 
+----------
+       30
+(1 row)
+
+INSERT 0 92
+ num_proc 
+----------
+       18
+(1 row)
+
+INSERT 0 98
+ num_proc 
+----------
+       19
+(1 row)
+
+INSERT 0 91
+ num_proc 
+----------
+       43
+(1 row)
+
+INSERT 0 91
+ num_proc 
+----------
+       47
+(1 row)
+
+INSERT 0 98
+ num_proc 
+----------
+       55
+(1 row)
+
+INSERT 0 103
+ num_proc 
+----------
+       10
+(1 row)
+
+INSERT 0 97
+ num_proc 
+----------
+        7
+(1 row)
+
+INSERT 0 93
+ num_proc 
+----------
+       34
+(1 row)
+
+INSERT 0 97
+ num_proc 
+----------
+       26
+(1 row)
+
+INSERT 0 101
+ num_proc 
+----------
+       42
+(1 row)
+
+INSERT 0 105
+ num_proc 
+----------
+       35
+(1 row)
+
+INSERT 0 99
+ num_proc 
+----------
+        6
+(1 row)
+
+INSERT 0 97
+ num_proc 
+----------
+       23
+(1 row)
+
+INSERT 0 123
+ num_proc 
+----------
+       17
+(1 row)
+
+INSERT 0 121
+ num_proc 
+----------
+        5
+(1 row)
+
+INSERT 0 98
+ num_proc 
+----------
+       22
+(1 row)
+
+INSERT 0 116
+ num_proc 
+----------
+        0
+(1 row)
+
+INSERT 0 121
+ num_proc 
+----------
+       52
+(1 row)
+
+INSERT 0 116
+ num_proc 
+----------
+       21
+(1 row)
+
+INSERT 0 98
+ num_proc 
+----------
+       27
+(1 row)
+
+INSERT 0 116
+ num_proc 
+----------
+       13
+(1 row)
+
+INSERT 0 99
+ num_proc 
+----------
+       14
+(1 row)
+
+INSERT 0 107
+ num_proc 
+----------
+       38
+(1 row)
+
+INSERT 0 120
+ num_proc 
+----------
+       41
+(1 row)
+
+INSERT 0 108
+INSERT 0 132
+ num_proc 
+----------
+       54
+(1 row)
+
+ num_proc 
+----------
+       29
+(1 row)
+
+INSERT 0 116
+ num_proc 
+----------
+       37
+(1 row)
+
+INSERT 0 111
+ num_proc 
+----------
+       39
+(1 row)
+
+INSERT 0 106
+ num_proc 
+----------
+       50
+(1 row)
+
+INSERT 0 127
+ num_proc 
+----------
+       12
+(1 row)
+
+INSERT 0 132
+ num_proc 
+----------
+       25
+(1 row)
+
+INSERT 0 130
+ num_proc 
+----------
+        4
+(1 row)
+
+INSERT 0 102
+INSERT 0 106
+ num_proc 
+----------
+       31
+(1 row)
+
+ num_proc 
+----------
+       15
+(1 row)
+
+INSERT 0 133
+ num_proc 
+----------
+       32
+(1 row)
+
+INSERT 0 131
+ num_proc 
+----------
+        8
+(1 row)
+
+INSERT 0 104
+INSERT 0 102
+ num_proc 
+----------
+       51
+(1 row)
+
+ num_proc 
+----------
+       11
+(1 row)
+
+INSERT 0 109
+ num_proc 
+----------
+        2
+(1 row)
+
+INSERT 0 107
+ num_proc 
+----------
+        3
+(1 row)
+
+INSERT 0 123
+ num_proc 
+----------
+       16
+(1 row)
+
+INSERT 0 131
+ num_proc 
+----------
+       48
+(1 row)
+
+INSERT 0 116
+ num_proc 
+----------
+        1
+(1 row)
+
+INSERT 0 114
+ num_proc 
+----------
+       46
+(1 row)
+
+INSERT 0 124
+ num_proc 
+----------
+       45
+(1 row)
+
+INSERT 0 134
+ num_proc 
+----------
+       36
+(1 row)
+
+INSERT 0 124
+ num_proc 
+----------
+        9
+(1 row)
+
+INSERT 0 131
+ num_proc 
+----------
+       53
+(1 row)
+
+INSERT 0 139
+INSERT 0 132
+ num_proc 
+----------
+       33
+(1 row)
+
+ num_proc 
+----------
+       20
+(1 row)
+
+INSERT 0 140
+ num_proc 
+----------
+       24
+(1 row)
+
+INSERT 0 135
+ num_proc 
+----------
+       49
+(1 row)
+
+INSERT 0 134
+ num_proc 
+----------
+       28
+(1 row)
+
+INSERT 0 134
+ num_proc 
+----------
+       40
+(1 row)
+
+INSERT 0 136
+ num_proc 
+----------
+       44
+(1 row)
+
+INSERT 0 12231
+ num_proc 
+----------
+       10
+(1 row)
+
+INSERT 0 12135
+ num_proc 
+----------
+       43
+(1 row)
+
+INSERT 0 11856
+ num_proc 
+----------
+       14
+(1 row)
+
+INSERT 0 12402
+ num_proc 
+----------
+       47
+(1 row)
+
+INSERT 0 13109
+ num_proc 
+----------
+       35
+(1 row)
+
+INSERT 0 12022
+ num_proc 
+----------
+       11
+(1 row)
+
+INSERT 0 15079
+ num_proc 
+----------
+        6
+(1 row)
+
+INSERT 0 13843
+ num_proc 
+----------
+       18
+(1 row)
+
+INSERT 0 12075
+ num_proc 
+----------
+       23
+(1 row)
+
+INSERT 0 13571
+ num_proc 
+----------
+       27
+(1 row)
+
+INSERT 0 15642
+ num_proc 
+----------
+        5
+(1 row)
+
+INSERT 0 13649
+ num_proc 
+----------
+       19
+(1 row)
+
+INSERT 0 15176
+ num_proc 
+----------
+        0
+(1 row)
+
+INSERT 0 15940
+ num_proc 
+----------
+       50
+(1 row)
+
+INSERT 0 16575
+ num_proc 
+----------
+        9
+(1 row)
+
+INSERT 0 14914
+ num_proc 
+----------
+        3
+(1 row)
+
+INSERT 0 16715
+ num_proc 
+----------
+       55
+(1 row)
+
+INSERT 0 14740
+ num_proc 
+----------
+       38
+(1 row)
+
+INSERT 0 15161
+ num_proc 
+----------
+        1
+(1 row)
+
+INSERT 0 17574
+ num_proc 
+----------
+       54
+(1 row)
+
+INSERT 0 13243
+ num_proc 
+----------
+       51
+(1 row)
+
+INSERT 0 16292
+ num_proc 
+----------
+       42
+(1 row)
+
+INSERT 0 13906
+ num_proc 
+----------
+       41
+(1 row)
+
+INSERT 0 14156
+ num_proc 
+----------
+        2
+(1 row)
+
+INSERT 0 13892
+ num_proc 
+----------
+       15
+(1 row)
+
+INSERT 0 16116
+ num_proc 
+----------
+       25
+(1 row)
+
+INSERT 0 15722
+ num_proc 
+----------
+       12
+(1 row)
+
+INSERT 0 11572
+ num_proc 
+----------
+       34
+(1 row)
+
+INSERT 0 16164
+ num_proc 
+----------
+       39
+(1 row)
+
+INSERT 0 15099
+ num_proc 
+----------
+       44
+(1 row)
+
+INSERT 0 16919
+ num_proc 
+----------
+       21
+(1 row)
+
+INSERT 0 15577
+ num_proc 
+----------
+       30
+(1 row)
+
+INSERT 0 14949
+ num_proc 
+----------
+       31
+(1 row)
+
+INSERT 0 15112
+ num_proc 
+----------
+       22
+(1 row)
+
+INSERT 0 17904
+ num_proc 
+----------
+       48
+(1 row)
+
+INSERT 0 17714
+ num_proc 
+----------
+       37
+(1 row)
+
+INSERT 0 14582
+ num_proc 
+----------
+       13
+(1 row)
+
+INSERT 0 14500
+ num_proc 
+----------
+        7
+(1 row)
+
+INSERT 0 20511
+ num_proc 
+----------
+       29
+(1 row)
+
+INSERT 0 16880
+ num_proc 
+----------
+       28
+(1 row)
+
+INSERT 0 16600
+ num_proc 
+----------
+       36
+(1 row)
+
+INSERT 0 18143
+ num_proc 
+----------
+       26
+(1 row)
+
+INSERT 0 18515
+ num_proc 
+----------
+       40
+(1 row)
+
+INSERT 0 16648
+ num_proc 
+----------
+       16
+(1 row)
+
+INSERT 0 15412
+ num_proc 
+----------
+       46
+(1 row)
+
+INSERT 0 17465
+ num_proc 
+----------
+        8
+(1 row)
+
+INSERT 0 17999
+ num_proc 
+----------
+       17
+(1 row)
+
+INSERT 0 19151
+ num_proc 
+----------
+       52
+(1 row)
+
+INSERT 0 19964
+ num_proc 
+----------
+       32
+(1 row)
+
+INSERT 0 18262
+ num_proc 
+----------
+       45
+(1 row)
+
+INSERT 0 21067
+ num_proc 
+----------
+       53
+(1 row)
+
+INSERT 0 21254
+ num_proc 
+----------
+       20
+(1 row)
+
+INSERT 0 24299
+ num_proc 
+----------
+        4
+(1 row)
+
+INSERT 0 21512
+ num_proc 
+----------
+       24
+(1 row)
+
+INSERT 0 21676
+ num_proc 
+----------
+       49
+(1 row)
+
+INSERT 0 24790
+ num_proc 
+----------
+       33
+(1 row)
+
+INSERT 0 205451
+ num_proc 
+----------
+       14
+(1 row)
+
+INSERT 0 255189
+INSERT 0 218080
+ num_proc 
+----------
+       10
+(1 row)
+
+INSERT 0 256196
+INSERT 0 215888
+ num_proc 
+----------
+       51
+(1 row)
+
+INSERT 0 239952
+INSERT 0 217837
+ num_proc 
+----------
+        1
+(1 row)
+
+INSERT 0 257814
+INSERT 0 193871
+ num_proc 
+----------
+       43
+(1 row)
+
+INSERT 0 223937
+INSERT 0 297762
+ num_proc 
+----------
+       21
+(1 row)
+
+INSERT 0 185873
+ num_proc 
+----------
+       18
+(1 row)
+
+INSERT 0 329991
+INSERT 0 231119
+INSERT 0 252050
+ num_proc 
+----------
+        3
+(1 row)
+
+INSERT 0 258426
+ num_proc 
+----------
+       44
+(1 row)
+
+INSERT 0 291626
+INSERT 0 276548
+INSERT 0 226287
+ num_proc 
+----------
+       22
+(1 row)
+
+INSERT 0 256719
+ num_proc 
+----------
+       54
+(1 row)
+
+INSERT 0 212528
+ num_proc 
+----------
+       47
+(1 row)
+
+INSERT 0 233726
+ num_proc 
+----------
+       30
+(1 row)
+
+INSERT 0 289077
+ num_proc 
+----------
+        5
+(1 row)
+
+INSERT 0 252971
+INSERT 0 234881
+INSERT 0 310002
+INSERT 0 282362
+INSERT 0 233750
+INSERT 0 212846
+ num_proc 
+----------
+       11
+(1 row)
+
+INSERT 0 264144
+ num_proc 
+----------
+        9
+(1 row)
+
+INSERT 0 177475
+ num_proc 
+----------
+       27
+(1 row)
+
+INSERT 0 231784
+ num_proc 
+----------
+       55
+(1 row)
+
+INSERT 0 284143
+ num_proc 
+----------
+       37
+(1 row)
+
+INSERT 0 259433
+ num_proc 
+----------
+       12
+(1 row)
+
+INSERT 0 278607
+ num_proc 
+----------
+       52
+(1 row)
+
+INSERT 0 324977
+INSERT 0 259736
+INSERT 0 219706
+INSERT 0 285396
+INSERT 0 330403
+INSERT 0 296478
+INSERT 0 365732
+INSERT 0 249870
+ num_proc 
+----------
+        0
+(1 row)
+
+INSERT 0 219417
+ num_proc 
+----------
+       19
+(1 row)
+
+INSERT 0 190337
+ num_proc 
+----------
+       34
+(1 row)
+
+INSERT 0 280839
+ num_proc 
+----------
+       40
+(1 row)
+
+INSERT 0 237114
+ num_proc 
+----------
+       31
+(1 row)
+
+INSERT 0 273937
+ num_proc 
+----------
+       25
+(1 row)
+
+INSERT 0 294017
+ num_proc 
+----------
+       45
+(1 row)
+
+INSERT 0 320133
+INSERT 0 245412
+ num_proc 
+----------
+       38
+(1 row)
+
+INSERT 0 252378
+INSERT 0 259360
+INSERT 0 219850
+INSERT 0 256967
+ num_proc 
+----------
+       46
+(1 row)
+
+INSERT 0 358268
+INSERT 0 319376
+INSERT 0 318925
+INSERT 0 293266
+INSERT 0 244492
+ num_proc 
+----------
+       35
+(1 row)
+
+INSERT 0 273254
+INSERT 0 196534
+ num_proc 
+----------
+        2
+(1 row)
+
+INSERT 0 262249
+INSERT 0 273691
+ num_proc 
+----------
+       36
+(1 row)
+
+INSERT 0 240927
+INSERT 0 324607
+INSERT 0 249532
+ num_proc 
+----------
+       17
+(1 row)
+
+INSERT 0 294149
+INSERT 0 224959
+ num_proc 
+----------
+       41
+(1 row)
+
+INSERT 0 252572
+INSERT 0 218796
+ num_proc 
+----------
+       15
+(1 row)
+
+INSERT 0 245773
+ num_proc 
+----------
+       39
+(1 row)
+
+INSERT 0 278453
+INSERT 0 279262
+INSERT 0 211718
+ num_proc 
+----------
+        7
+(1 row)
+
+INSERT 0 245271
+ num_proc 
+----------
+       42
+(1 row)
+
+INSERT 0 246007
+INSERT 0 271947
+INSERT 0 286393
+ num_proc 
+----------
+       48
+(1 row)
+
+INSERT 0 329348
+ num_proc 
+----------
+       53
+(1 row)
+
+INSERT 0 329284
+INSERT 0 384424
+INSERT 0 307317
+ num_proc 
+----------
+       49
+(1 row)
+
+INSERT 0 233372
+ num_proc 
+----------
+       50
+(1 row)
+
+INSERT 0 355658
+INSERT 0 281715
+INSERT 0 278774
+ num_proc 
+----------
+       28
+(1 row)
+
+INSERT 0 326014
+ num_proc 
+----------
+        8
+(1 row)
+
+INSERT 0 283911
+ num_proc 
+----------
+       29
+(1 row)
+
+INSERT 0 221668
+ num_proc 
+----------
+        6
+(1 row)
+
+INSERT 0 326900
+INSERT 0 351559
+INSERT 0 351007
+INSERT 0 237386
+INSERT 0 347043
+ num_proc 
+----------
+       33
+(1 row)
+
+INSERT 0 267493
+ num_proc 
+----------
+       16
+(1 row)
+
+INSERT 0 368654
+INSERT 0 281746
+ num_proc 
+----------
+       32
+(1 row)
+
+INSERT 0 303661
+INSERT 0 261638
+ num_proc 
+----------
+       26
+(1 row)
+
+INSERT 0 185849
+ num_proc 
+----------
+       23
+(1 row)
+
+INSERT 0 349445
+INSERT 0 221598
+INSERT 0 260200
+INSERT 0 223391
+ num_proc 
+----------
+       13
+(1 row)
+
+INSERT 0 267894
+INSERT 0 307150
+ num_proc 
+----------
+       24
+(1 row)
+
+INSERT 0 366226
+ num_proc 
+----------
+       20
+(1 row)
+
+INSERT 0 364040
+INSERT 0 386460
+INSERT 0 308007
+ num_proc 
+----------
+        4
+(1 row)
+
+INSERT 0 341456
+--Building complete landtenure dataset
+INSERT INTO lt_model.v_pacotes_proc05_imoveisfull
+    SELECT * FROM lt_model.v_pacotes_proc03_unregistered AS a
+    UNION ALL
+    SELECT * FROM lt_model.v_pacotes_proc04_flagprop AS b;
+INSERT 0 30451113
+
+\echo `rm var4.txt`
+
+\echo `rm var5.txt`
+
+\echo `rm var6.txt`
+
