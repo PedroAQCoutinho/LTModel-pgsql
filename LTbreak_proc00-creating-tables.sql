@@ -47,7 +47,8 @@ CREATE TABLE lt_model.v_pacotes_proc04_flagprop
 DROP TABLE IF EXISTS lt_model.v_pacotes_proc05_imoveisfull; 
 CREATE TABLE lt_model.v_pacotes_proc05_imoveisfull
 (
-  gid integer,
+  id serial not null,
+  gid_break integer,
   cd_mun bigint,
   cd_bioma integer,
   cd_bacia character varying(14),
