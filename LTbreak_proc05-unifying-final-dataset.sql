@@ -1,10 +1,10 @@
 --Building complete landtenure dataset
-INSERT INTO lt_model.v_pacotes_proc05_imoveisfull (gid_break, cd_mun, cd_bioma, cd_bacia, geom)
+INSERT INTO lt_model.v_pacotes_proc05_imoveisfull (gid_imovel, cd_mun, cd_bioma, cd_bacia, geom)
     SELECT * FROM lt_model.v_pacotes_proc03_unregistered AS a
     UNION ALL
     SELECT * FROM lt_model.v_pacotes_proc04_flagprop AS b;
 
-ALTER TABLE lt_model.v_pacotes_proc05_imoveisfull ADD PRIMARY KEY(id);
+ALTER TABLE lt_model.v_pacotes_proc05_imoveisfull ADD PRIMARY KEY(gid_break);
 CREATE INDEX gix_v_pacotes_proc05_imoveisfull ON lt_model.v_pacotes_proc05_imoveisfull USING gist(geom);
 
 \echo `rm var4.txt`
