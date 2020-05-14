@@ -1,0 +1,61 @@
+UPDATE lt_model.inputs
+SET table_name = 
+  CASE id
+    WHEN 4  THEN 'input_break_acervofundiario_assentamentos_2019_incra'
+    WHEN 10 THEN 'input_break_hidrografia_bancoareia_250_2015_ibge'
+    WHEN 13 THEN 'input_break_rod_estaduais_2018_dnit_60m'
+    WHEN 14 THEN 'input_break_rod_estaduais_2018_dnit_15m'
+    WHEN 15 THEN 'input_break_rod_estaduais_2018_dnit_30m'
+    WHEN 16 THEN 'input_break_rod_federais_2020_dnit_60m'
+    WHEN 17 THEN 'input_break_rod_federais_2020_dnit_15m'
+    WHEN 18 THEN 'input_break_rod_federais_2020_dnit_30m'
+    WHEN 19 THEN 'input_break_acervofundiario_quilombolas_2019_incra'
+    WHEN 21 THEN 'input_break_florestastipoa_comunitario_2018_sfb'
+    WHEN 22 THEN 'input_break_bi_am_glebasfederais_terralegal_2015_incra'
+    WHEN 23 THEN 'input_break_acervofundiario_snci_publico_2019_incra'
+    WHEN 24 THEN 'input_break_florestastipob_2018_sfb'
+    WHEN 25 THEN 'input_break_acervofundiario_sigef_publico_2019_incra'
+    WHEN 26 THEN 'input_break_ferrovia_2018_mi_30m'
+    WHEN 27 THEN 'input_break_ferrovia_2015_ibge_30m'
+    WHEN 28 THEN 'input_break_florestastipoa_ml_2018_sfb'
+    WHEN 29 THEN 'input_break_bi_am_areamilitar_1000_2016_ibge'
+    WHEN 30 THEN 'input_break_rod_2019_ibge_30m'
+    WHEN 31 THEN 'input_break_rod_2019_ibge_15'
+    WHEN 40 THEN 'input_break_terrasindigenas_2019_funai'
+    WHEN 41 THEN 'input_break_terrasindigenas_2019_funai'
+    WHEN 42 THEN 'input_break_ucs_2019_mma'
+    WHEN 43 THEN 'input_break_ucs_2019_mma'
+    WHEN 44 THEN 'input_break_hidrografia_trecho_massadagua_250_2019_ibge'
+  ELSE table_name
+  END
+
+-- UPDATE lt_model.inputs
+-- SET table_name = 
+--   CASE id
+--     WHEN 4  THEN 'input_acervofundiario_assentamentos_2019_incra'
+--     WHEN 10 THEN 'input_hidrografia_bancoareia_250_2015_ibge'
+--     WHEN 13 THEN 'input_rod_estaduais_2018_dnit_60m'
+--     WHEN 14 THEN 'input_rod_estaduais_2018_dnit_15m'
+--     WHEN 15 THEN 'input_rod_estaduais_2018_dnit_30m'
+--     WHEN 16 THEN 'input_rod_federais_2020_dnit_60m'
+--     WHEN 17 THEN 'input_rod_federais_2020_dnit_15m'
+--     WHEN 18 THEN 'input_rod_federais_2020_dnit_30m'
+--     WHEN 19 THEN 'input_acervofundiario_quilombolas_2019_incra'
+--     WHEN 21 THEN 'input_florestastipoa_comunitario_2018_sfb'
+--     WHEN 22 THEN 'input_bi_am_glebasfederais_terralegal_2015_incra'
+--     WHEN 23 THEN 'input_acervofundiario_snci_publico_2019_incra'
+--     WHEN 24 THEN 'input_florestastipob_2018_sfb'
+--     WHEN 25 THEN 'input_acervofundiario_sigef_publico_2019_incra'
+--     WHEN 26 THEN 'input_ferrovia_2018_mi_30m'
+--     WHEN 27 THEN 'input_ferrovia_2015_ibge_30m'
+--     WHEN 28 THEN 'input_florestastipoa_ml_2018_sfb'
+--     WHEN 29 THEN 'input_bi_am_areamilitar_1000_2016_ibge'
+--     WHEN 30 THEN 'input_rod_2019_ibge_30m'
+--     WHEN 31 THEN 'input_rod_2019_ibge_15'
+--     WHEN 40 THEN 'input_terrasindigenas_2019_funai'
+--     WHEN 41 THEN 'input_terrasindigenas_2019_funai'
+--     WHEN 42 THEN 'input_ucs_2019_mma'
+--     WHEN 43 THEN 'input_ucs_2019_mma'
+--     WHEN 44 THEN 'input_hidrografia_trecho_massadagua_250_2019_ibge'
+--   ELSE table_name
+--   END
