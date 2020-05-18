@@ -51,7 +51,7 @@ SET table_name =
 --     WHEN 28 THEN 'input_florestastipoa_ml_2018_sfb'
 --     WHEN 29 THEN 'input_bi_am_areamilitar_1000_2016_ibge'
 --     WHEN 30 THEN 'input_rod_2019_ibge_30m'
---     WHEN 31 THEN 'input_rod_2019_ibge_15'
+--     WHEN 31 THEN 'input_rod_2019_ibge_15m'
 --     WHEN 40 THEN 'input_terrasindigenas_2019_funai'
 --     WHEN 41 THEN 'input_terrasindigenas_2019_funai'
 --     WHEN 42 THEN 'input_ucs_2019_mma'
