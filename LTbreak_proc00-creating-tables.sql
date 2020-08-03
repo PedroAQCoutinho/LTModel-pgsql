@@ -44,8 +44,8 @@ CREATE TABLE lt_model.v_pacotes_proc04_flagprop
 );
 
 --Table with final dataset
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc05_imoveisfull; 
-CREATE TABLE lt_model.v_pacotes_proc05_imoveisfull
+DROP TABLE IF EXISTS lt_model.v_pacotes_proc05_malha_break; 
+CREATE TABLE lt_model.v_pacotes_proc05_malha_break
 (
   gid_break serial not null,
   gid_imovel integer,
