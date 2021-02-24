@@ -18,7 +18,7 @@ SELECT a.gid,
 		a.geom 
 	WHEN 1 THEN
 		CASE WHEN ST_Within(a.geom, b.geom) THEN null ELSE 
-			ST_Difference(a.geom, b.geom))
+			ST_Difference(a.geom, b.geom)
 		END
 	ELSE
 			ST_Safe_Difference(a.geom, b.geom)
