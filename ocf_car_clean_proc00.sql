@@ -23,23 +23,29 @@ SET param_text = 'lt_model' WHERE id = 27;
 
 
 -- Criando tabelas vazias do SIGEF e do SNCI
+DROP TABLE IF EXISTS lt_model.input_snci_privado_incra_null;
 CREATE TABLE lt_model.input_snci_privado_incra_null AS 
 	(SELECT * FROM lt_model.input_snci_privado_incra_2020 LIMIT 0);
+
+DROP TABLE IF EXISTS lt_model.input_sigef_privado_incra_null;
 CREATE TABLE lt_model.input_sigef_privado_incra_null AS 
 	(SELECT * FROM lt_model.input_sigef_privado_incra_2020 LIMIT 0);
 
 --PROC01--
 -- Separa��o dos pol�gonos de cada tipo (IRU, AST, PCT)
+DROP TABLE IF EXISTS lt_model.input_car_iru;
 CREATE TABLE lt_model.input_car_iru AS (
 	SELECT * FROM car.pa_br_20210412_areaimovel_albers
 	WHERE tp_imovel = 'IRU'
 );
 
+DROP TABLE IF EXISTS lt_model.input_car_ast;
 CREATE TABLE lt_model.input_car_ast AS (
 	SELECT * FROM car.pa_br_20210412_areaimovel_albers
 	WHERE tp_imovel = 'AST'
 );
 
+DROP TABLE IF EXISTS lt_model.input_car_pct;
 CREATE TABLE lt_model.input_car_pct  AS (
 	SELECT * FROM car.pa_br_20210412_areaimovel_albers
 	WHERE tp_imovel = 'PCT'
@@ -57,7 +63,7 @@ CREATE TABLE lt_model.car_clean_proc03_ast_equalshape AS (
  WHERE 
   a.fid > b.fid 
 	AND 
-  ((a.area_orig = b.area_orig AND ST_Intersects(a.geom,b.geom))
+  ((a.nu_area = b.nu_area AND ST_Intersects(a.geom,b.geom))
 	OR 
   ST_Equals(a.geom,b.geom))
 );
@@ -89,8 +95,8 @@ CREATE TABLE lt_model.temp_car_clean_proc03_ast_excludelist_1 AS (
 DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_overlapshape;
 CREATE TABLE lt_model.car_clean_proc03_ast_overlapshape AS (
 	SELECT DISTINCT ON (fid)
-		CASE WHEN (sub.area_sobreposta / sub.area_orig_a) BETWEEN 0.75 AND 1.0 THEN
-			CASE WHEN (sub.area_sobreposta / sub.area_orig_a) <  (sub.area_sobreposta / sub.area_orig_b) THEN fid_b
+		CASE WHEN (sub.area_sobreposta / sub.nu_area_a) BETWEEN 0.75 AND 1.0 THEN
+			CASE WHEN (sub.area_sobreposta / sub.nu_area_a) <  (sub.area_sobreposta / sub.nu_area_b) THEN fid_b
 				ELSE fid_a
 			END
 			ELSE NULL
@@ -99,8 +105,8 @@ CREATE TABLE lt_model.car_clean_proc03_ast_overlapshape AS (
 		(SELECT
 			a.fid fid_a,
 			b.fid fid_b,
-			a.area_orig area_orig_a,
-			b.area_orig area_orig_b,
+			a.nu_area nu_area_a,
+			b.nu_area nu_area_b,
 			ST_Area(ST_Intersection(a.geom,b.geom))/10000 area_sobreposta
 		FROM lt_model.input_car_ast a
 		JOIN lt_model.input_car_ast b
@@ -130,19 +136,19 @@ CREATE TABLE lt_model.temp_input_car_ast_cleaned AS (
 DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_overlaps_shapes;
 CREATE TABLE lt_model.car_clean_proc03_ast_overlaps_shapes AS (
 	SELECT DISTINCT ON (fid)
-		CASE WHEN ROUND((sub.area_sobreposta / sub.area_orig_a)::NUMERIC,2) BETWEEN 0.75 AND 1.0 THEN fid_a
+		CASE WHEN ROUND((sub.area_sobreposta / sub.nu_area_a)::NUMERIC,2) BETWEEN 0.75 AND 1.0 THEN fid_a
 			ELSE NULL
 		END AS fid
 	FROM 
 		(SELECT
 			a.fid fid_a,
-			a.area_orig AS area_orig_a,
+			a.nu_area AS nu_area_a,
 			ST_Area(ST_Intersection(a.geom,
 				ST_Union(b.geom)))/10000 area_sobreposta
 		FROM lt_model.temp_input_car_ast_cleaned a
 		JOIN lt_model.temp_input_car_ast_cleaned b
 			ON ST_Intersects(a.geom,b.geom) AND a.fid <> b.fid
-		GROUP BY a.fid,a.geom,a.area_orig
+		GROUP BY a.fid,a.geom,a.nu_area
 		ORDER BY a.fid, area_sobreposta DESC) sub
 );
 
