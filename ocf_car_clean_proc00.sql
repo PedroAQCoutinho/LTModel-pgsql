@@ -1,70 +1,46 @@
 -- CONFIGURA��ES --
 
 -- Definindo tabela de inputs com nova hierarquia
-create table lt_model.inputs_carocf as (select * from lt_model.inputs);
+UPDATE lt_model.inputs SET fla_proc = FALSE
+WHERE proc_order NOT IN (100,250,850,1100,1105);
 
-update lt_model.inputs_carocf set fla_proc = FALSE
-where proc_order NOT IN (100,200,800,1100,1105);
-
-update lt_model.inputs_carocf
-set table_name = 'input_car_pct_20180901_sfb',
-	layer_name = 'Imoveis do CAR do tipo PCT',
-	fla_proc = TRUE,
-  column_name = 'cod_imovel'
-where proc_order = 200; 
-
-update lt_model.inputs_carocf
-set table_name = 'input_car_ast_20180901_sfb_cleaned',
-	layer_name = 'Imoveis do CAR do tipo AST',
-	fla_proc = TRUE,
-  column_name = 'cod_imovel'
-where proc_order = 800; 
-
-ALTER TABLE lt_model.inputs
-RENAME TO inputs_old;
-
-ALTER TABLE lt_model.inputs_carocf
-RENAME TO inputs;
-
--- Alterando tabela params com novos inputs
-create table lt_model.params_carocf as (select * from lt_model.params);
+UPDATE lt_model.inputs SET fla_proc = TRUE
+WHERE proc_order IN (100,250,850,1100,1105);
 
 -- Atualizando tabela
-update lt_model.params_carocf
-set param_text = 'input_acervofundiario_snci_particular_2018_incra_null' where id = 14;
 
-update lt_model.params_carocf
-set param_text = 'input_acervofundiario_sigef_particular_2018_incra_null' where id = 17;
+UPDATE lt_model.params
+SET param_text = 'input_snci_privado_incra_null' WHERE id = 14;
 
-update lt_model.params_carocf
-set param_text = 'input_car_iru_20180901_sfb' where id = 26;
+UPDATE lt_model.params
+SET param_text = 'input_sigef_privado_incra_null' WHERE id = 17;
 
-update lt_model.params_carocf
-set param_text = 'lt_model' where id = 27;
+UPDATE lt_model.params
+SET param_text = 'input_car_iru' WHERE id = 26;
 
-ALTER TABLE lt_model.params
-RENAME TO params_old;
+UPDATE lt_model.params
+SET param_text = 'lt_model' WHERE id = 27;
 
-ALTER TABLE lt_model.params_carocf
-RENAME TO params;
 
 -- Criando tabelas vazias do SIGEF e do SNCI
-create table lt_model.input_acervofundiario_snci_particular_2018_incra_null AS (select * from lt_model.input_acervofundiario_snci_particular_2018_incra limit 0);
-create table lt_model.input_acervofundiario_sigef_particular_2018_incra_null AS (select * from lt_model.input_acervofundiario_sigef_particular_2018_incra limit 0);
+CREATE TABLE lt_model.input_snci_privado_incra_null AS 
+	(SELECT * FROM lt_model.input_snci_privado_incra_2020 LIMIT 0);
+CREATE TABLE lt_model.input_sigef_privado_incra_null AS 
+	(SELECT * FROM lt_model.input_sigef_privado_incra_2020 LIMIT 0);
 
 --PROC01--
 -- Separa��o dos pol�gonos de cada tipo (IRU, AST, PCT)
-CREATE TABLE lt_model.input_car_iru_20180901_sfb AS (
+CREATE TABLE lt_model.input_car_iru AS (
 	SELECT * FROM car.input_pa_br_areaimovel_20180901_sfb
 	WHERE tipo = 'IRU'
 );
 
-CREATE TABLE lt_model.input_car_ast_20180901_sfb AS (
+CREATE TABLE lt_model.input_car_ast AS (
 	SELECT * FROM car.input_pa_br_areaimovel_20180901_sfb
 	WHERE tipo = 'AST'
 );
 
-CREATE TABLE lt_model.input_car_pct_20180901_sfb  AS (
+CREATE TABLE lt_model.input_car_pct  AS (
 	SELECT * FROM car.input_pa_br_areaimovel_20180901_sfb
 	WHERE tipo = 'PCT'
 );
@@ -76,8 +52,8 @@ DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_equalshape;
 CREATE TABLE lt_model.car_clean_proc03_ast_equalshape AS (
  SELECT a.gid 
  FROM 
-  lt_model.input_car_ast_20180901_sfb a,
-  lt_model.input_car_ast_20180901_sfb b 
+  lt_model.input_car_ast a,
+  lt_model.input_car_ast b 
  WHERE 
   a.gid > b.gid 
 	AND 
@@ -91,8 +67,8 @@ DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_withinshape;
 CREATE TABLE lt_model.car_clean_proc03_ast_withinshape AS (
   SELECT b.gid
   FROM 
-	  lt_model.input_car_ast_20180901_sfb a,
-		lt_model.input_car_ast_20180901_sfb b
+	  lt_model.input_car_ast a,
+		lt_model.input_car_ast b
   WHERE 
 	  a.gid <> b.gid 
 		AND
@@ -126,8 +102,8 @@ CREATE TABLE lt_model.car_clean_proc03_ast_overlapshape AS (
 			a.area_orig area_orig_a,
 			b.area_orig area_orig_b,
 			ST_Area(ST_Intersection(a.geom,b.geom))/10000 area_sobreposta
-		FROM lt_model.input_car_ast_20180901_sfb a
-		JOIN lt_model.input_car_ast_20180901_sfb b
+		FROM lt_model.input_car_ast a
+		JOIN lt_model.input_car_ast b
 			ON ST_Intersects(a.geom,b.geom) AND a.gid <> b.gid
 		WHERE 		  
 			a.gid NOT IN (SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_1 WHERE gid IS NOT NULL)
@@ -144,9 +120,9 @@ CREATE TABLE lt_model.temp_car_clean_proc03_ast_excludelist_2 AS (
 );
 
 -- Limpeza tempor�ria da base original a partir da marca��o dos pol�gonos
-DROP TABLE IF EXISTS lt_model.temp_input_car_ast_20180901_sfb_cleaned;
-CREATE TABLE lt_model.temp_input_car_ast_20180901_sfb_cleaned AS (
- SELECT * FROM lt_model.input_car_ast_20180901_sfb 
+DROP TABLE IF EXISTS lt_model.temp_input_car_ast_cleaned;
+CREATE TABLE lt_model.temp_input_car_ast_cleaned AS (
+ SELECT * FROM lt_model.input_car_ast 
  WHERE gid NOT IN (SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_2 WHERE gid IS NOT NULL)
 );
 
@@ -163,8 +139,8 @@ CREATE TABLE lt_model.car_clean_proc03_ast_overlaps_shapes AS (
 			a.area_orig AS area_orig_a,
 			ST_Area(ST_Intersection(a.geom,
 				ST_Union(b.geom)))/10000 area_sobreposta
-		FROM lt_model.temp_input_car_ast_20180901_sfb_cleaned a
-		JOIN lt_model.temp_input_car_ast_20180901_sfb_cleaned b
+		FROM lt_model.temp_input_car_ast_cleaned a
+		JOIN lt_model.temp_input_car_ast_cleaned b
 			ON ST_Intersects(a.geom,b.geom) AND a.gid <> b.gid
 		GROUP BY a.gid,a.geom,a.area_orig
 		ORDER BY a.gid, area_sobreposta DESC) sub
@@ -177,9 +153,9 @@ CREATE TABLE lt_model.temp_car_clean_proc03_ast_excludelist_3 AS (
 );
 
 -- Limpeza final da base original a partir da marca��o dos pol�gonos
-DROP TABLE IF EXISTS lt_model.input_car_ast_20180901_sfb_cleaned;
-CREATE TABLE lt_model.input_car_ast_20180901_sfb_cleaned AS (
- SELECT * FROM lt_model.input_car_ast_20180901_sfb 
+DROP TABLE IF EXISTS lt_model.input_car_ast_cleaned;
+CREATE TABLE lt_model.input_car_ast_cleaned AS (
+ SELECT * FROM lt_model.input_car_ast 
  WHERE gid NOT IN (SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_3 WHERE gid IS NOT NULL)
 );
 
@@ -188,6 +164,22 @@ CREATE TABLE lt_model.input_car_ast_20180901_sfb_cleaned AS (
 DROP TABLE lt_model.temp_car_clean_proc03_ast_excludelist_1;
 DROP TABLE lt_model.temp_car_clean_proc03_ast_excludelist_2;
 DROP TABLE lt_model.temp_car_clean_proc03_ast_excludelist_3;
-DROP TABLE lt_model.temp_input_car_ast_20180901_sfb_cleaned;
+DROP TABLE lt_model.temp_input_car_ast_cleaned;
 ----------
 -------------------------------------------------------
+
+-- ROLLBACK PARA MALHA FUNDIÁRIA
+UPDATE lt_model.inputs SET fla_proc = TRUE
+WHERE proc_order NOT IN (56,250,850);
+
+UPDATE lt_model.inputs SET fla_proc = FALSE
+WHERE proc_order IN (56,250,850);
+
+UPDATE lt_model.params
+SET param_text = 'input_snci_privado_incra_2020' WHERE id = 14;
+UPDATE lt_model.params
+SET param_text = 'input_sigef_privado_incra_2020' WHERE id = 17;
+UPDATE lt_model.params
+SET param_text = 'pa_br_20210122_areaimovel_albers' WHERE id = 26;
+UPDATE lt_model.params
+SET param_text = 'car' WHERE id = 27;
