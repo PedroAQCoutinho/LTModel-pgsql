@@ -50,12 +50,12 @@ CREATE TABLE lt_model.input_car_pct  AS (
 -- Marca��o dos pol�gonos com geometria id�ntica
 DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_equalshape;
 CREATE TABLE lt_model.car_clean_proc03_ast_equalshape AS (
- SELECT a.gid 
+ SELECT a.fid 
  FROM 
   lt_model.input_car_ast a,
   lt_model.input_car_ast b 
  WHERE 
-  a.gid > b.gid 
+  a.fid > b.fid 
 	AND 
   ((a.area_orig = b.area_orig AND ST_Intersects(a.geom,b.geom))
 	OR 
@@ -65,98 +65,98 @@ CREATE TABLE lt_model.car_clean_proc03_ast_equalshape AS (
 -- Marca��o dos pol�gonos inteiramente sobrepostos
 DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_withinshape;
 CREATE TABLE lt_model.car_clean_proc03_ast_withinshape AS (
-  SELECT b.gid
+  SELECT b.fid
   FROM 
 	  lt_model.input_car_ast a,
 		lt_model.input_car_ast b
   WHERE 
-	  a.gid <> b.gid 
+	  a.fid <> b.fid 
 		AND
 		ST_Within(b.geom,a.geom) 
 		AND
-		a.gid NOT IN (SELECT gid FROM lt_model.car_clean_proc03_ast_equalshape WHERE gid IS NOT NULL) 
+		a.fid NOT IN (SELECT fid FROM lt_model.car_clean_proc03_ast_equalshape WHERE fid IS NOT NULL) 
 		AND
-		b.gid NOT IN (SELECT gid FROM lt_model.car_clean_proc03_ast_equalshape WHERE gid IS NOT NULL)
+		b.fid NOT IN (SELECT fid FROM lt_model.car_clean_proc03_ast_equalshape WHERE fid IS NOT NULL)
 );
 
 CREATE TABLE lt_model.temp_car_clean_proc03_ast_excludelist_1 AS (
-	SELECT gid FROM lt_model.car_clean_proc03_ast_equalshape
+	SELECT fid FROM lt_model.car_clean_proc03_ast_equalshape
 	UNION
-	SELECT gid FROM lt_model.car_clean_proc03_ast_withinshape
+	SELECT fid FROM lt_model.car_clean_proc03_ast_withinshape
 );
 
 -- Marca��o dos pol�gonos com mais de 75% de sobreposi��o
 DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_overlapshape;
 CREATE TABLE lt_model.car_clean_proc03_ast_overlapshape AS (
-	SELECT DISTINCT ON (gid)
+	SELECT DISTINCT ON (fid)
 		CASE WHEN (sub.area_sobreposta / sub.area_orig_a) BETWEEN 0.75 AND 1.0 THEN
-			CASE WHEN (sub.area_sobreposta / sub.area_orig_a) <  (sub.area_sobreposta / sub.area_orig_b) THEN gid_b
-				ELSE gid_a
+			CASE WHEN (sub.area_sobreposta / sub.area_orig_a) <  (sub.area_sobreposta / sub.area_orig_b) THEN fid_b
+				ELSE fid_a
 			END
 			ELSE NULL
-		END AS gid
+		END AS fid
 	FROM 
 		(SELECT
-			a.gid gid_a,
-			b.gid gid_b,
+			a.fid fid_a,
+			b.fid fid_b,
 			a.area_orig area_orig_a,
 			b.area_orig area_orig_b,
 			ST_Area(ST_Intersection(a.geom,b.geom))/10000 area_sobreposta
 		FROM lt_model.input_car_ast a
 		JOIN lt_model.input_car_ast b
-			ON ST_Intersects(a.geom,b.geom) AND a.gid <> b.gid
+			ON ST_Intersects(a.geom,b.geom) AND a.fid <> b.fid
 		WHERE 		  
-			a.gid NOT IN (SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_1 WHERE gid IS NOT NULL)
+			a.fid NOT IN (SELECT fid FROM lt_model.temp_car_clean_proc03_ast_excludelist_1 WHERE fid IS NOT NULL)
 			AND
-			b.gid NOT IN (SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_1 WHERE gid IS NOT NULL)
-		ORDER BY a.gid, area_sobreposta DESC) sub
+			b.fid NOT IN (SELECT fid FROM lt_model.temp_car_clean_proc03_ast_excludelist_1 WHERE fid IS NOT NULL)
+		ORDER BY a.fid, area_sobreposta DESC) sub
 );
 
 
 CREATE TABLE lt_model.temp_car_clean_proc03_ast_excludelist_2 AS (
-	SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_1
+	SELECT fid FROM lt_model.temp_car_clean_proc03_ast_excludelist_1
 	UNION
-	SELECT gid FROM lt_model.car_clean_proc03_ast_overlapshape
+	SELECT fid FROM lt_model.car_clean_proc03_ast_overlapshape
 );
 
 -- Limpeza tempor�ria da base original a partir da marca��o dos pol�gonos
 DROP TABLE IF EXISTS lt_model.temp_input_car_ast_cleaned;
 CREATE TABLE lt_model.temp_input_car_ast_cleaned AS (
  SELECT * FROM lt_model.input_car_ast 
- WHERE gid NOT IN (SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_2 WHERE gid IS NOT NULL)
+ WHERE fid NOT IN (SELECT fid FROM lt_model.temp_car_clean_proc03_ast_excludelist_2 WHERE fid IS NOT NULL)
 );
 
 -- Marca��o dos pol�gonos com mais de uma sobreposi��o
 DROP TABLE IF EXISTS lt_model.car_clean_proc03_ast_overlaps_shapes;
 CREATE TABLE lt_model.car_clean_proc03_ast_overlaps_shapes AS (
-	SELECT DISTINCT ON (gid)
-		CASE WHEN ROUND((sub.area_sobreposta / sub.area_orig_a)::NUMERIC,2) BETWEEN 0.75 AND 1.0 THEN gid_a
+	SELECT DISTINCT ON (fid)
+		CASE WHEN ROUND((sub.area_sobreposta / sub.area_orig_a)::NUMERIC,2) BETWEEN 0.75 AND 1.0 THEN fid_a
 			ELSE NULL
-		END AS gid
+		END AS fid
 	FROM 
 		(SELECT
-			a.gid gid_a,
+			a.fid fid_a,
 			a.area_orig AS area_orig_a,
 			ST_Area(ST_Intersection(a.geom,
 				ST_Union(b.geom)))/10000 area_sobreposta
 		FROM lt_model.temp_input_car_ast_cleaned a
 		JOIN lt_model.temp_input_car_ast_cleaned b
-			ON ST_Intersects(a.geom,b.geom) AND a.gid <> b.gid
-		GROUP BY a.gid,a.geom,a.area_orig
-		ORDER BY a.gid, area_sobreposta DESC) sub
+			ON ST_Intersects(a.geom,b.geom) AND a.fid <> b.fid
+		GROUP BY a.fid,a.geom,a.area_orig
+		ORDER BY a.fid, area_sobreposta DESC) sub
 );
 
 CREATE TABLE lt_model.temp_car_clean_proc03_ast_excludelist_3 AS (
-	SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_2
+	SELECT fid FROM lt_model.temp_car_clean_proc03_ast_excludelist_2
 	UNION
-	SELECT gid FROM lt_model.car_clean_proc03_ast_overlaps_shapes
+	SELECT fid FROM lt_model.car_clean_proc03_ast_overlaps_shapes
 );
 
 -- Limpeza final da base original a partir da marca��o dos pol�gonos
 DROP TABLE IF EXISTS lt_model.input_car_ast_cleaned;
 CREATE TABLE lt_model.input_car_ast_cleaned AS (
  SELECT * FROM lt_model.input_car_ast 
- WHERE gid NOT IN (SELECT gid FROM lt_model.temp_car_clean_proc03_ast_excludelist_3 WHERE gid IS NOT NULL)
+ WHERE fid NOT IN (SELECT fid FROM lt_model.temp_car_clean_proc03_ast_excludelist_3 WHERE fid IS NOT NULL)
 );
 
 
