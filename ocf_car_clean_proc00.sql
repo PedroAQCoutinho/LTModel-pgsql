@@ -32,17 +32,17 @@ CREATE TABLE lt_model.input_sigef_privado_incra_null AS
 -- Separa��o dos pol�gonos de cada tipo (IRU, AST, PCT)
 CREATE TABLE lt_model.input_car_iru AS (
 	SELECT * FROM car.pa_br_20210412_areaimovel_albers
-	WHERE tipo = 'IRU'
+	WHERE tp_imovel = 'IRU'
 );
 
 CREATE TABLE lt_model.input_car_ast AS (
 	SELECT * FROM car.pa_br_20210412_areaimovel_albers
-	WHERE tipo = 'AST'
+	WHERE tp_imovel = 'AST'
 );
 
 CREATE TABLE lt_model.input_car_pct  AS (
 	SELECT * FROM car.pa_br_20210412_areaimovel_albers
-	WHERE tipo = 'PCT'
+	WHERE tp_imovel = 'PCT'
 );
 ----------
 
