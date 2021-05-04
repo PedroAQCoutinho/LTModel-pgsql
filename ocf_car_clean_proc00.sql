@@ -176,17 +176,17 @@ DROP TABLE lt_model.temp_input_car_ast_cleaned;
 -------------------------------------------------------
 
 -- ROLLBACK PARA MALHA FUNDIÁRIA
-UPDATE lt_model.inputs SET fla_proc = TRUE
-WHERE proc_order NOT IN (56,250,850);
+-- UPDATE lt_model.inputs SET fla_proc = TRUE
+-- WHERE proc_order NOT IN (56,250,850);
 
-UPDATE lt_model.inputs SET fla_proc = FALSE
-WHERE proc_order IN (56,250,850);
+-- UPDATE lt_model.inputs SET fla_proc = FALSE
+-- WHERE proc_order IN (56,250,850);
 
-UPDATE lt_model.params
-SET param_text = 'input_snci_privado_incra_2020' WHERE id = 14;
-UPDATE lt_model.params
-SET param_text = 'input_sigef_privado_incra_2020' WHERE id = 17;
-UPDATE lt_model.params
-SET param_text = 'pa_br_20210122_areaimovel_albers' WHERE id = 26;
-UPDATE lt_model.params
-SET param_text = 'car' WHERE id = 27;
+-- UPDATE lt_model.params
+-- SET param_text = 'input_snci_privado_incra_2020' WHERE id = 14;
+-- UPDATE lt_model.params
+-- SET param_text = 'input_sigef_privado_incra_2020' WHERE id = 17;
+-- UPDATE lt_model.params
+-- SET param_text = 'pa_br_20210122_areaimovel_albers' WHERE id = 26;
+-- UPDATE lt_model.params
+-- SET param_text = 'car' WHERE id = 27;
