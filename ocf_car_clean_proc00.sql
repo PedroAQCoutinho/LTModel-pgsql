@@ -44,6 +44,7 @@ CREATE TABLE lt_model.input_car_ast AS (
 	SELECT * FROM car.pa_br_20210412_areaimovel_albers
 	WHERE tp_imovel = 'AST'
 );
+UPDATE lt_model.input_car_ast SET geom = ST_ColletcionExtract(ST_MakeValid(geom),3) WHERE ST_IsValid(geom) IS FALSE;
 
 DROP TABLE IF EXISTS lt_model.input_car_pct;
 CREATE TABLE lt_model.input_car_pct  AS (
