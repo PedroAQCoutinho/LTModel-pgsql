@@ -489,3 +489,34 @@ END IF;
 END $function$
 ;
 
+
+
+
+CREATE OR REPLACE FUNCTION lt_model.add_layer(var_table_name text, var_sub_class text, var_cd_uf integer)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE var_input lt_model.inputs;
+DECLARE var_envelope TEXT = CASE WHEN var_cd_uf = -1 THEN '' ELSE (SELECT ST_AsText(ST_Envelope(ST_Transform(geom, 97823))) FROM lt_model.aux_pa_br_estados WHERE cd_uf = var_cd_uf) END;
+BEGIN
+RAISE NOTICE 'Running: %', var_table_name;
+var_table_name = LEFT(LOWER(var_table_name), 63);
+SELECT * INTO var_input FROM lt_model.inputs WHERE table_name = var_table_name AND sub_class = var_sub_class;
+
+
+
+		-- If is Multipolygon simplify
+		var_table_name = lt_model.simplify_if_needed(var_input);
+
+
+		IF (SELECT COUNT(*) FROM lt_model.result) > 0 THEN
+			PERFORM lt_model.proc0_update_intersection(var_input, var_table_name);
+			IF NOT EXISTS (SELECT table_source FROM lt_model.result WHERE table_source = var_table_name AND sub_class = var_sub_class) THEN
+				PERFORM lt_model.proc0_insert_all_into_result(var_table_name, var_input, var_envelope);
+			END IF;
+		ELSE
+			PERFORM lt_model.proc0_insert_all_into_result(var_table_name, var_input, var_envelope);
+		END IF;
+		RAISE NOTICE 'Finished at: %', clock_timestamp();
+END $function$
+;
