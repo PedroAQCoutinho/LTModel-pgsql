@@ -1,3 +1,4 @@
+--Isso é um teste
 ALTER TABLE recorte.inputs
   ADD CONSTRAINT inputs_pkey PRIMARY KEY(id);
 
