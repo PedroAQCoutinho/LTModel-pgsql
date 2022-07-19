@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 DROP TABLE IF EXISTS proc1_03_z1_car_intersects;
 CREATE TABLE proc1_03_z1_car_intersects

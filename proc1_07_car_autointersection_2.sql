@@ -1,5 +1,5 @@
 -- OLD VERSION:
--- SET search_path TO lt_model, public;
+-- SET search_path TO recorte, public;
 
 -- INSERT INTO proc1_02_car_result
 -- SELECT c1.gid gid, 
@@ -24,7 +24,7 @@
 
 --NEW VERSION 2021-05-17:
 
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 INSERT INTO proc1_02_car_result
 SELECT c1.gid gid, 

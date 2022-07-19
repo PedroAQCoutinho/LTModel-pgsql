@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
  CREATE INDEX IF NOT EXISTS ix_limpa_area_simulada_15 ON proc3_12_a_limpar_area_simulada USING BTREE ((cd_mun % 15));
 
 -- Simplify multipolygon

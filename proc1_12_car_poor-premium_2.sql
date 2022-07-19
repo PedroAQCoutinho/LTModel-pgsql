@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 INSERT INTO proc1_06_car_poor_clean_without_premium (
 	gid,

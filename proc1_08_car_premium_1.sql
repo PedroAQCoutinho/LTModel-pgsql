@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 \copy (SELECT param_text FROM recorte.params WHERE param_name = 'car_table_schema') TO 'var1.txt' CSV header;
 \copy (SELECT param_text FROM recorte.params WHERE param_name = 'car_table_name') TO 'var2.txt' CSV header;

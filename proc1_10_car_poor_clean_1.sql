@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 DROP TABLE IF EXISTS proc1_04_car_poor_clean;
 CREATE TABLE proc1_04_car_poor_clean (

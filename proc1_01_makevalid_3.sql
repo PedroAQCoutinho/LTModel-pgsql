@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM recorte.log_outputs));
 
 INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)

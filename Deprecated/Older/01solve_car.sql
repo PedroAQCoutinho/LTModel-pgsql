@@ -1,7 +1,7 @@
 SELECT clock_timestamp();
 
 -- CAR SOLVING
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM recorte.log_outputs));
 -- SELECT nextval('seq_current_run');

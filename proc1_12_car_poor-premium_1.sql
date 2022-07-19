@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 ANALYZE proc1_04_car_poor_clean;
 ANALYZE proc1_05_car_premium_clean;

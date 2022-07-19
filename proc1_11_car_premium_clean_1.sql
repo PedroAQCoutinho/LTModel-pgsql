@@ -1,4 +1,4 @@
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 
 -- Clean CAR_premium with self overlay random priority -- 3m27s
 DROP TABLE IF EXISTS proc1_05_car_premium_clean;

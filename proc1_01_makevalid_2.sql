@@ -1,5 +1,5 @@
 -- CAR SOLVING
-SET search_path TO lt_model, public;
+SET search_path TO recorte, public;
 \set car_table_schema `tail -1 var1.txt`
 \set car_table_name `tail -1 var2.txt`
 
