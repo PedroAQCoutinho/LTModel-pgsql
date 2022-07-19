@@ -1,14 +1,15 @@
-userName=atlas
-databaseServer=127.0.0.1
-databaseName=atlas
+export PGPASSWORD='gpp-es@lq'
+userName=postgres
+databaseServer=0.0.0.0
+databaseName=postgres
 numProc=1
-portNumber=5432
+portNumber=5433
 wait=false
 error=false
 varPriority=random
 
 if [ -n "${USER+1}" ]; then
-  userName=$USER
+  userName=postgres
 fi
 
 if [ -n "${PGDATABASE+1}" ]; then
