@@ -1,4 +1,4 @@
-CREATE TABLE lt_model.params (
+CREATE TABLE recorte.params (
     id SERIAL PRIMARY KEY,
     param_name TEXT UNIQUE,
     param_desc TEXT,
@@ -8,4 +8,4 @@ CREATE TABLE lt_model.params (
 --------------------
 -- ROLLBACK
 --------------------
--- DROP TABLE lt_model.params;
+-- DROP TABLE recorte.params;

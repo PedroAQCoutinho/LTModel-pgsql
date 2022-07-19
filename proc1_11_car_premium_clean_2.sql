@@ -15,7 +15,7 @@ SELECT a.gid,
 FROM proc1_03_is_premium a
 LEFT JOIN proc1_03_z1_car_intersects c ON c.gid = a.gid
 LEFT JOIN proc1_03_is_premium b ON c.gid2 = b.gid 
-AND (CASE (SELECT param_text param_priority FROM lt_model.params WHERE param_name = 'priority_autointersection')
+AND (CASE (SELECT param_text param_priority FROM recorte.params WHERE param_name = 'priority_autointersection')
 			WHEN 'S' THEN 
 				b.shape_area < a.shape_area 
 			WHEN 'L' THEN

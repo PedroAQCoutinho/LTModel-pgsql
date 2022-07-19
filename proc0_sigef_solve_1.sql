@@ -1,25 +1,25 @@
 SET search_path TO lt_model, public;
 
---SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
+--SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM recorte.log_outputs));
 SELECT nextval('seq_current_run');
 
 -- SIGEF clean
-SELECT lt_model.clean_sigef((SELECT param_text FROM lt_model.params WHERE param_name = 'snci_input_table'), (SELECT param_text FROM lt_model.params WHERE param_name = 'snci_code_column'), (SELECT param_text FROM lt_model.params WHERE param_name = 'snci_cert_date_column'), currval('seq_current_run')::int);
+SELECT recorte.clean_sigef((SELECT param_text FROM recorte.params WHERE param_name = 'snci_input_table'), (SELECT param_text FROM recorte.params WHERE param_name = 'snci_code_column'), (SELECT param_text FROM recorte.params WHERE param_name = 'snci_cert_date_column'), currval('seq_current_run')::int);
 
 DROP TABLE IF EXISTS proc0_01_snci;
-CREATE TABLE lt_model.proc0_01_snci AS
+CREATE TABLE recorte.proc0_01_snci AS
 SELECT * FROM sigef_cleaned;
 
 
 -- SIGEF law clean
-SELECT lt_model.clean_sigef((SELECT param_text FROM lt_model.params WHERE param_name = 'sigef_input_table'), (SELECT param_text FROM lt_model.params WHERE param_name = 'sigef_code_column'), (SELECT param_text FROM lt_model.params WHERE param_name = 'sigef_cert_date_column'), currval('seq_current_run')::int);
+SELECT recorte.clean_sigef((SELECT param_text FROM recorte.params WHERE param_name = 'sigef_input_table'), (SELECT param_text FROM recorte.params WHERE param_name = 'sigef_code_column'), (SELECT param_text FROM recorte.params WHERE param_name = 'sigef_cert_date_column'), currval('seq_current_run')::int);
 
 DROP TABLE IF EXISTS proc0_02_sigef;
-CREATE TABLE lt_model.proc0_02_sigef AS
+CREATE TABLE recorte.proc0_02_sigef AS
 SELECT * FROM sigef_cleaned;
 
-DROP TABLE IF EXISTS lt_model.proc0_03_sigef_union;
-CREATE TABLE lt_model.proc0_03_sigef_union AS
+DROP TABLE IF EXISTS recorte.proc0_03_sigef_union;
+CREATE TABLE recorte.proc0_03_sigef_union AS
 SELECT row_number() OVER ()::int rid, *
 FROM (SELECT *, true is_law2001 FROM proc0_01_snci
 UNION ALL
@@ -87,16 +87,16 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 		SUM(area2)
 	FROM log_operation operation,
 	proc0_05_sigef_result b
-	WHERE operation.nom_operation = 'incra_pr_mischaracterized' AND b.area_loss2 > (SELECT param_value FROM lt_model.params WHERE param_name = 'incra_pr_exclusion_tolerance')
+	WHERE operation.nom_operation = 'incra_pr_mischaracterized' AND b.area_loss2 > (SELECT param_value FROM recorte.params WHERE param_name = 'incra_pr_exclusion_tolerance')
 	GROUP BY operation.id;
 
 DELETE FROM proc0_05_sigef_result
-WHERE area_loss2 > (SELECT param_value FROM lt_model.params WHERE param_name = 'incra_pr_exclusion_tolerance');
+WHERE area_loss2 > (SELECT param_value FROM recorte.params WHERE param_name = 'incra_pr_exclusion_tolerance');
 
-DROP TABLE IF EXISTS lt_model.lt_model_incra_pr;
-CREATE TABLE lt_model.lt_model_incra_pr AS
+DROP TABLE IF EXISTS recorte.lt_model_incra_pr;
+CREATE TABLE recorte.lt_model_incra_pr AS
 SELECT rid, original_gid gid, cod, original_area, area1, area2, cert_date, 
        area_loss1, area_loss2, is_law2001, does_overlay, ST_CollectionExtract(ST_MakeValid(geom),3) geom
   FROM proc0_05_sigef_result;
 
-CREATE INDEX gix_lt_model_incra_pr ON lt_model.lt_model_incra_pr USING GIST (geom);
+CREATE INDEX gix_lt_model_incra_pr ON recorte.lt_model_incra_pr USING GIST (geom);

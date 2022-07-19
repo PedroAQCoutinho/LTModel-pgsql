@@ -1,2 +1,2 @@
-INSERT INTO lt_model.result2 (gid, ownership_class, sub_class, area, area_original, geom)
-SELECT gid + (SELECT MAX(gid) FROM lt_model.result3), 'PL', 'SI', area, area, ST_Multi(ST_Force2D(geom)) FROM proc3_20_voronoifinal;
+INSERT INTO recorte.result2 (gid, ownership_class, sub_class, area, area_original, geom)
+SELECT gid + (SELECT MAX(gid) FROM recorte.result3), 'PL', 'SI', area, area, ST_Multi(ST_Force2D(geom)) FROM proc3_20_voronoifinal;

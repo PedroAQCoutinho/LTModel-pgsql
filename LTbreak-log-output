@@ -1,14 +1,14 @@
-\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'mun_table_name') TO 'var4.txt' CSV header;
+\copy (SELECT param_text FROM recorte.params WHERE param_name = 'mun_table_name') TO 'var4.txt' CSV header;
 COPY 1
-\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'biome_table_name') TO 'var5.txt' CSV header;
+\copy (SELECT param_text FROM recorte.params WHERE param_name = 'biome_table_name') TO 'var5.txt' CSV header;
 COPY 1
-\copy (SELECT param_text FROM lt_model.params WHERE param_name = 'otto_table_name') TO 'var6.txt' CSV header;
+\copy (SELECT param_text FROM recorte.params WHERE param_name = 'otto_table_name') TO 'var6.txt' CSV header;
 COPY 1
 
 --Breaking municipalities by biome
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc01_breakbiome; 
+DROP TABLE IF EXISTS recorte.v_pacotes_proc01_breakbiome; 
 DROP TABLE
-CREATE TABLE lt_model.v_pacotes_proc01_breakbiome
+CREATE TABLE recorte.v_pacotes_proc01_breakbiome
 (
   cd_mun integer,
   cd_bioma integer,
@@ -17,9 +17,9 @@ CREATE TABLE lt_model.v_pacotes_proc01_breakbiome
 CREATE TABLE
 
 --Breaking municipalities+biome by ottobacia
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc02_ottobacia;
+DROP TABLE IF EXISTS recorte.v_pacotes_proc02_ottobacia;
 DROP TABLE
-CREATE TABLE lt_model.v_pacotes_proc02_ottobacia
+CREATE TABLE recorte.v_pacotes_proc02_ottobacia
 (
   cd_mun bigint,
   cd_bioma integer,
@@ -29,9 +29,9 @@ CREATE TABLE lt_model.v_pacotes_proc02_ottobacia
 CREATE TABLE
 
 --Table with rural properties and unregistred lands
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc03_unregistered; 
+DROP TABLE IF EXISTS recorte.v_pacotes_proc03_unregistered; 
 DROP TABLE
-CREATE TABLE lt_model.v_pacotes_proc03_unregistered
+CREATE TABLE recorte.v_pacotes_proc03_unregistered
 (
   gid integer,
   cd_mun bigint,
@@ -42,9 +42,9 @@ CREATE TABLE lt_model.v_pacotes_proc03_unregistered
 CREATE TABLE
 
 --Table with rural properties breaks
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc04_flagprop; 
+DROP TABLE IF EXISTS recorte.v_pacotes_proc04_flagprop; 
 DROP TABLE
-CREATE TABLE lt_model.v_pacotes_proc04_flagprop
+CREATE TABLE recorte.v_pacotes_proc04_flagprop
 (
   gid integer,
   cd_mun bigint,
@@ -55,9 +55,9 @@ CREATE TABLE lt_model.v_pacotes_proc04_flagprop
 CREATE TABLE
 
 --Table with final dataset
-DROP TABLE IF EXISTS lt_model.v_pacotes_proc05_imoveisfull; 
+DROP TABLE IF EXISTS recorte.v_pacotes_proc05_imoveisfull; 
 DROP TABLE
-CREATE TABLE lt_model.v_pacotes_proc05_imoveisfull
+CREATE TABLE recorte.v_pacotes_proc05_imoveisfull
 (
   gid integer,
   cd_mun bigint,
@@ -1411,10 +1411,10 @@ INSERT 0 187822
 
 INSERT 0 213417
 --Building complete landtenure dataset
-INSERT INTO lt_model.v_pacotes_proc05_imoveisfull
-    SELECT * FROM lt_model.v_pacotes_proc03_unregistered AS a
+INSERT INTO recorte.v_pacotes_proc05_imoveisfull
+    SELECT * FROM recorte.v_pacotes_proc03_unregistered AS a
     UNION ALL
-    SELECT * FROM lt_model.v_pacotes_proc04_flagprop AS b;
+    SELECT * FROM recorte.v_pacotes_proc04_flagprop AS b;
 INSERT 0 18010794
 
 \echo `rm var4.txt`

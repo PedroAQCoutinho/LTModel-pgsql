@@ -12,13 +12,13 @@ FROM public.es_sp_car_merge_050517_albers;
 -- CAR processado premium
 INSERT INTO projetos.a2017_tematico_01_num_conhecido
 SELECT 'CAR Premium', COUNT(*)::integer, ROUND(SUM(area)/10000)::integer 
-FROM lt_model.result 
+FROM recorte.result 
 WHERE sub_class = 'CARpr';
 
 -- CAR processado linha
 INSERT INTO projetos.a2017_tematico_01_num_conhecido
 SELECT 'CAR Linha', COUNT(*)::integer, ROUND(SUM(area)/10000)::integer 
-FROM lt_model.result 
+FROM recorte.result 
 WHERE sub_class = 'CARpo';
 
 
@@ -40,14 +40,14 @@ JOIN public.pa_br_acervofundiario_certimoveisruraislei10267_2001_privado_in a ON
 -- CAR processado linha
 INSERT INTO projetos.a2017_tematico_01_num_conhecido
 SELECT 'SIGEF Processado', COUNT(*)::integer, ROUND(SUM(area)/10000)::integer 
-FROM lt_model.result2 
+FROM recorte.result2 
 WHERE sub_class = 'SIGEF';
 
 SELECT * FROM projetos.a2017_tematico_01_num_conhecido;
 
 
 
-SELECT sub_class, MAX(proc_order) proc_order FROM lt_model.inputs
+SELECT sub_class, MAX(proc_order) proc_order FROM recorte.inputs
 GROUP BY sub_class
 ORDER BY proc_order;
 
@@ -84,13 +84,13 @@ ROUND(SUM(CASE WHEN CARpr_area_loss IS NULL THEN 0 ELSE CARpr_area_loss END)/100
 ROUND(SUM(CASE WHEN CARpo_area_loss IS NULL THEN 0 ELSE CARpo_area_loss END)/10000), 
 ROUND(SUM(CASE WHEN ND_area_loss IS NULL THEN 0 ELSE ND_area_loss END)/10000), 
 ROUND(SUM(CASE WHEN URB_area_loss IS NULL THEN 0 ELSE URB_area_loss END)/10000)
-FROM lt_model.result
+FROM recorte.result
 GROUP BY sub_class;
 
 
 
 SELECT a.* FROM projetos.a2017_tematico_02_matriz_sobreposicao_area a
-JOIN lt_model.inputs b ON a.sub_class = b.sub_class
+JOIN recorte.inputs b ON a.sub_class = b.sub_class
 GROUP BY a.sub_class, ag, aru, carpo, carpr, ml, nd, ql, sigef, ti, 
        trans, ucpi, ucus, urb
 ORDER BY MAX(b.proc_order);
@@ -130,13 +130,13 @@ COUNT(CARpr_area_loss),
 COUNT(CARpo_area_loss), 
 COUNT(ND_area_loss), 
 COUNT(URB_area_loss)
-FROM lt_model.result
+FROM recorte.result
 GROUP BY sub_class;
 
 
 
 SELECT a.* FROM projetos.a2017_tematico_02_matriz_sobreposicao_qde a
-JOIN lt_model.inputs b ON a.sub_class = b.sub_class
+JOIN recorte.inputs b ON a.sub_class = b.sub_class
 GROUP BY a.sub_class, ag, aru, carpo, carpr, ml, nd, ql, sigef, ti, 
        trans, ucpi, ucus, urb
 ORDER BY MAX(b.proc_order);
@@ -152,17 +152,17 @@ num_imoveis INT,
 area_ha INT
 );
 
-CREATE VIEW lt_model.sub_class_priority AS
+CREATE VIEW recorte.sub_class_priority AS
 SELECT sub_class, MAX(proc_order) priority
-FROM lt_model.inputs
+FROM recorte.inputs
 GROUP BY sub_class
 ORDER BY priority ASC;
 
 
 INSERT INTO projetos.a2017_tematico_02_num_area_class
 SELECT priority, b.sub_class, COUNT(a.gid), ROUND(SUM(CASE WHEN area IS NULL THEN 0 ELSE area END)/10000) 
-FROM lt_model.sub_class_priority b
-LEFT JOIN  lt_model.result2 a ON a.sub_class = b.sub_class
+FROM recorte.sub_class_priority b
+LEFT JOIN  recorte.result2 a ON a.sub_class = b.sub_class
 GROUP BY priority, b.sub_class;
 
 

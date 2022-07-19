@@ -1,5 +1,5 @@
 SET search_path TO lt_model, public;
-SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
+SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM recorte.log_outputs));
 
 
 DROP TABLE IF EXISTS proc1_00_3car_same_car;

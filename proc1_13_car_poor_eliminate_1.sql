@@ -1,5 +1,5 @@
 SET search_path TO lt_model, public;
-SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
+SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM recorte.log_outputs));
 
 
 DROP TABLE IF EXISTS proc1_07_car_solved;
@@ -60,8 +60,8 @@ FROM (
 --Calculating area loss
 UPDATE proc1_09_car_single
 SET fla_eliminate =  true
-FROM (SELECT param_value param_area FROM lt_model.params WHERE param_name = 'car_area_loss_tolerance') A,
-(SELECT param_value param_ci FROM lt_model.params WHERE param_name = 'car_ci_minimum') B
+FROM (SELECT param_value param_area FROM recorte.params WHERE param_name = 'car_area_loss_tolerance') A,
+(SELECT param_value param_ci FROM recorte.params WHERE param_name = 'car_ci_minimum') B
 WHERE 
 	area_loss > param_area OR
 	ci < param_ci;
@@ -108,11 +108,11 @@ false fla_multipolygon FROM proc1_09_car_single WHERE NOT fla_eliminate;
 DROP TABLE IF EXISTS temp_already_process CASCADE;
 CREATE TEMP TABLE temp_already_process(small INT);
 
-SELECT lt_model.eliminate_car();
+SELECT recorte.eliminate_car();
 
 DO $$
 BEGIN
-WHILE (SELECT lt_model.eliminate_car_recursive()) > 0 LOOP
+WHILE (SELECT recorte.eliminate_car_recursive()) > 0 LOOP
 END LOOP;
 END $$;
 
@@ -120,8 +120,8 @@ END $$;
 ALTER TABLE proc1_11_temp_car_consolidated 
 ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;
 
-DROP TABLE IF EXISTS lt_model.proc1_12_car_cleaned;
-CREATE TABLE lt_model.proc1_12_car_cleaned AS
+DROP TABLE IF EXISTS recorte.proc1_12_car_cleaned;
+CREATE TABLE recorte.proc1_12_car_cleaned AS
 SELECT gid, 1.0-(ST_Area(geom)/area_original) area_loss, ST_Area(geom) area, area_original, ST_Perimeter(geom) perimeter, false is_premium, geom 
 FROM (
 	SELECT gid, area_original, ST_CollectionExtract(ST_MakeValid(ST_Collect(geom)), 3) geom
@@ -129,17 +129,17 @@ FROM (
 	GROUP BY gid, area_original
 ) a;
 
-INSERT INTO lt_model.proc1_12_car_cleaned
+INSERT INTO recorte.proc1_12_car_cleaned
 SELECT gid, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, shape_area area_original, ST_Perimeter(geom) perimeter, is_premium, geom
-FROM (SELECT gid, ST_CollectionExtract(ST_MakeValid(geom),3) geom, shape_area, is_premium FROM lt_model.proc1_07_car_solved
+FROM (SELECT gid, ST_CollectionExtract(ST_MakeValid(geom),3) geom, shape_area, is_premium FROM recorte.proc1_07_car_solved
 WHERE is_premium) a;
 
-UPDATE lt_model.proc1_12_car_cleaned
+UPDATE recorte.proc1_12_car_cleaned
 SET area_original = area, area_loss = 0
 WHERE area_loss < 0;
 
 CREATE INDEX gix_proc1_12_car_cleaned
-ON lt_model.proc1_12_car_cleaned
+ON recorte.proc1_12_car_cleaned
 USING GIST (geom);
 
 SELECT clock_timestamp()-current_timestamp;

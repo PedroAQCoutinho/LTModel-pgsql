@@ -65,7 +65,7 @@ DROP TABLE IF EXISTS sheipinho_nodes;
 INSERT INTO proc3_13_limpa_area_simulada_result
 SELECT *, row_number() OVER () gid, ST_Area(geom)/10000 area_ha FROM
     (SELECT cd_mun, (ST_Dump(geom)).geom
-    FROM (SELECT a.cd_mun, a.gid, lt_model.cut_polygon_multilinestring(a.geom, ST_Collect(ST_MakeLine(b.geom, b.geom2))) geom
+    FROM (SELECT a.cd_mun, a.gid, recorte.cut_polygon_multilinestring(a.geom, ST_Collect(ST_MakeLine(b.geom, b.geom2))) geom
     FROM sheipinho_temp a
     LEFT JOIN sheipinho_nodes b ON a.cd_mun = b.cd_mun AND a.gid = b.gid
     GROUP BY a.cd_mun, a.gid, a.geom) A) B;

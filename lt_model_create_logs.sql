@@ -1,4 +1,4 @@
-CREATE TABLE lt_model.log_erros
+CREATE TABLE recorte.log_erros
 (
   geom1 geometry,
   geom2 geometry
@@ -6,11 +6,11 @@ CREATE TABLE lt_model.log_erros
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model.log_erros
+ALTER TABLE recorte.log_erros
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model.log_erros TO atlas;
+GRANT ALL ON TABLE recorte.log_erros TO atlas;
 
-CREATE TABLE lt_model.log_operation
+CREATE TABLE recorte.log_operation
 (
   id serial NOT NULL,
   nom_operation text,
@@ -21,11 +21,11 @@ CREATE TABLE lt_model.log_operation
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model.log_operation
+ALTER TABLE recorte.log_operation
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model.log_operation TO atlas;
+GRANT ALL ON TABLE recorte.log_operation TO atlas;
 
-CREATE TABLE lt_model.log_outputs
+CREATE TABLE recorte.log_outputs
 (
   id serial NOT NULL,
   num_run integer,
@@ -34,17 +34,17 @@ CREATE TABLE lt_model.log_outputs
   val_area numeric,
   CONSTRAINT log_outputs_pkey PRIMARY KEY (id),
   CONSTRAINT log_outputs_fk_operation_fkey FOREIGN KEY (fk_operation)
-      REFERENCES lt_model.log_operation (id) MATCH SIMPLE
+      REFERENCES recorte.log_operation (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model.log_outputs
+ALTER TABLE recorte.log_outputs
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model.log_outputs TO atlas;
+GRANT ALL ON TABLE recorte.log_outputs TO atlas;
 
-CREATE TABLE lt_model.log_simulate
+CREATE TABLE recorte.log_simulate
 (
   num_run integer,
   cod_state smallint,
@@ -59,6 +59,6 @@ CREATE TABLE lt_model.log_simulate
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE lt_model.log_simulate
+ALTER TABLE recorte.log_simulate
   OWNER TO atlas;
-GRANT ALL ON TABLE lt_model.log_simulate TO atlas;
+GRANT ALL ON TABLE recorte.log_simulate TO atlas;

@@ -3,7 +3,7 @@ SELECT clock_timestamp();
 -- CAR SOLVING
 SET search_path TO lt_model, public;
 
-SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM lt_model.log_outputs));
+SELECT setval('seq_current_run', (SELECT MAX(num_run) FROM recorte.log_outputs));
 -- SELECT nextval('seq_current_run');
 
 
@@ -142,7 +142,7 @@ CREATE INDEX gix_temp_car_3 ON temp_car_3 USING GIST (geom);
 -- WHERE ci <= 0.12;
 
 -- SIGEF OVERLAYING
-CREATE INDEX IF NOT EXISTS gix_lt_model_incra_pr ON lt_model.lt_model_incra_pr USING GIST (geom);
+CREATE INDEX IF NOT EXISTS gix_lt_model_incra_pr ON recorte.lt_model_incra_pr USING GIST (geom);
 
 
 
@@ -168,7 +168,7 @@ SELECT
 	MAX(ST_Area(b.geom)) sigef_area, 
 	a.shape_leng
 FROM temp_car_3 a
-LEFT JOIN lt_model.lt_model_incra_pr b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
+LEFT JOIN recorte.lt_model_incra_pr b ON ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom) 
 	--AND ST_XMax(b.geom) < 658294.02429628 AND ST_XMin(b.geom) > 542810.3515331885 AND ST_YMax(b.geom) < -1077895.2638318148 AND ST_YMin(b.geom) > -1179502.5469183084
 GROUP BY a.gid, a.geom, a.shape_area, a.shape_leng) c;
 
@@ -211,7 +211,7 @@ GROUP BY operation.id;
 DROP TABLE IF EXISTS proc1_01_car_sigef_union;
 CREATE TABLE proc1_01_car_sigef_union AS
 SELECT gid, ST_Multi(geom) geom, ST_Area(geom) shape_area, ST_Perimeter(geom) shape_leng, 0 area_loss, true fla_sigef
-FROM lt_model.lt_model_incra_pr
+FROM recorte.lt_model_incra_pr
 --WHERE ST_XMax(geom) < 658294.02429628 AND ST_XMin(geom) > 542810.3515331885 AND ST_YMax(geom) < -1077895.2638318148 AND ST_YMin(geom) > -1179502.5469183084
 ;
 
@@ -297,13 +297,13 @@ GROUP BY operation.id;
 
 
 -- CREATE TABLE of everything that intersects -- 11m29s
-INSERT INTO lt_model.proc1_03_z1_car_intersects AS
+INSERT INTO recorte.proc1_03_z1_car_intersects AS
 SELECT a.gid, b.gid gid2, a.fla_car_premium, b.fla_car_premium fla_car_premium2, a.new_area, a.incra_area_loss
 FROM proc1_03_is_premium a
 JOIN proc1_03_is_premium b ON a.gid <> b.gid AND ST_Intersects(a.geom, b.geom) AND NOT ST_Touches(a.geom, b.geom)
 WHERE (gid % 15) = :var_proc;
 
-CREATE INDEX IF NOT EXISTS  ix_car_intersects ON lt_model.proc1_03_z1_car_intersects USING BTREE (gid, gid2);
+CREATE INDEX IF NOT EXISTS  ix_car_intersects ON recorte.proc1_03_z1_car_intersects USING BTREE (gid, gid2);
 
 --log poor self intersection
 INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
@@ -312,7 +312,7 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 	COUNT(*),
 	SUM(new_area)
 FROM log_operation operation,
-(SELECT DISTINCT ON (gid) * FROM lt_model.proc1_03_z1_car_intersects  
+(SELECT DISTINCT ON (gid) * FROM recorte.proc1_03_z1_car_intersects  
 ) b
 WHERE operation.nom_operation = 'car_poor_self_overlay' AND NOT b.fla_car_premium AND NOT b.fla_car_premium2
 GROUP BY operation.id;
@@ -325,7 +325,7 @@ INSERT INTO log_outputs (num_run, fk_operation, num_geom, val_area)
 	COUNT(*),
 	SUM(new_area)
 FROM log_operation operation,
-(SELECT DISTINCT ON (gid) * FROM lt_model.proc1_03_z1_car_intersects 
+(SELECT DISTINCT ON (gid) * FROM recorte.proc1_03_z1_car_intersects 
 ) b
 WHERE operation.nom_operation = 'car_premium_self_overlay' AND b.fla_car_premium AND b.fla_car_premium2
 GROUP BY operation.id;
@@ -565,34 +565,34 @@ SELECT *, false fla_multipolygon FROM proc1_09_car_single WHERE NOT fla_eliminat
 DROP TABLE IF EXISTS temp_already_process CASCADE;
 CREATE TEMP TABLE temp_already_process(small INT);
 
-SELECT lt_model.eliminate_car(); --1m45s
+SELECT recorte.eliminate_car(); --1m45s
 
 DO $$ --1m09s
 BEGIN
-WHILE (SELECT lt_model.eliminate_car_recursive()) > 0 LOOP
+WHILE (SELECT recorte.eliminate_car_recursive()) > 0 LOOP
 END LOOP;
 END $$;
 
 -- CREATE TABLE temp_small_points AS
 -- SELECT * FROM temp_small_points;
 -- 
--- ALTER TABLE lt_model.temp_small_points
+-- ALTER TABLE recorte.temp_small_points
 -- ADD COLUMN fid SERIAL PRIMARY KEY;
 -- 
--- CREATE TABLE lt_model.temp_small_points2 AS
+-- CREATE TABLE recorte.temp_small_points2 AS
 -- SELECT * FROM temp_small_points2;
 -- 
--- ALTER TABLE lt_model.temp_small_points2
+-- ALTER TABLE recorte.temp_small_points2
 -- ADD COLUMN fid SERIAL PRIMARY KEY;
 -- 
--- CREATE TABLE lt_model.temp_max_intersect AS
+-- CREATE TABLE recorte.temp_max_intersect AS
 -- SELECT * FROM temp_max_intersect;
 -- 
--- ALTER TABLE lt_model.temp_max_intersect
+-- ALTER TABLE recorte.temp_max_intersect
 -- ADD COLUMN fid SERIAL PRIMARY KEY;
 -- 
 -- 
--- CREATE TABLE lt_model.not_processed_1st AS
+-- CREATE TABLE recorte.not_processed_1st AS
 -- SELECT * FROM v_temp_small_points;
 -- 
 
@@ -600,12 +600,12 @@ END $$;
 ALTER TABLE proc1_11_temp_car_consolidated 
 ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;
 
-DROP TABLE IF EXISTS lt_model.lt_model_car_po;
-CREATE TABLE lt_model.lt_model_car_po AS
+DROP TABLE IF EXISTS recorte.lt_model_car_po;
+CREATE TABLE recorte.lt_model_car_po AS
 SELECT * FROM proc1_11_temp_car_consolidated;
 
-DROP TABLE IF EXISTS lt_model.lt_model_car_pr;
-CREATE TABLE lt_model.lt_model_car_pr AS
+DROP TABLE IF EXISTS recorte.lt_model_car_pr;
+CREATE TABLE recorte.lt_model_car_pr AS
 SELECT gid, shape_area, false, 1-(ST_Area(geom)/shape_area) area_loss, ST_Area(geom) area, ST_Perimeter(geom), 1 ci, geom
 FROM proc1_07_car_solved
 WHERE is_premium;

@@ -1,6 +1,6 @@
-CREATE OR REPLACE FUNCTION lt_model.proc0_insert_all_into_result(
+CREATE OR REPLACE FUNCTION recorte.proc0_insert_all_into_result(
     var_table_name text,
-    var_input lt_model.inputs,
+    var_input recorte.inputs,
     var_envelope text)
   RETURNS void AS
 $BODY$
@@ -10,7 +10,7 @@ BEGIN
 	RAISE NOTICE 'Inserting all geometries from %...', var_table_name;
 		IF var_envelope != '' THEN
 			EXECUTE FORMAT($$
-					INSERT INTO lt_model.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
+					INSERT INTO recorte.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
 					SELECT *, area_original area 
 					FROM (SELECT %1$L table_source, %2$L ownership_class, %3$L sub_class, ST_Area(%4$I) area_original, ST_Multi(ST_Force2D(%4$I)) geom, original_gid original_gid
 					FROM %1$I
@@ -18,25 +18,25 @@ BEGIN
 				$$, var_table_name, var_input.ownership_class, var_input.sub_class, geom_name, var_envelope);
 		ELSE
 			EXECUTE FORMAT($$
-					INSERT INTO lt_model.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
+					INSERT INTO recorte.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
 					SELECT *, area_original area 
 					FROM (SELECT %1$L table_source, %2$L ownership_class, %3$L sub_class, ST_Area(%4$I) area_original, ST_Multi(ST_Force2D(%4$I)) geom, original_gid original_gid
 					FROM %1$I
 					) t
 				$$, var_table_name, var_input.ownership_class, var_input.sub_class, geom_name);
 		END IF;
-	ANALYZE lt_model.result;
+	ANALYZE recorte.result;
 	RAISE NOTICE 'Insertion of % completed!', var_table_name;
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION lt_model.proc0_insert_all_into_result(text, lt_model.inputs, text)
+ALTER FUNCTION recorte.proc0_insert_all_into_result(text, recorte.inputs, text)
   OWNER TO atlas;
   
-CREATE OR REPLACE FUNCTION lt_model.proc0_insert_all_into_result(
+CREATE OR REPLACE FUNCTION recorte.proc0_insert_all_into_result(
     var_table_name text,
-    var_input lt_model.inputs,
+    var_input recorte.inputs,
     var_envelope text,
     var_num_proc integer,
     var_proc integer)
@@ -48,7 +48,7 @@ BEGIN
 	RAISE NOTICE 'Inserting all geometries from %...', var_table_name;
 		IF var_envelope != '' THEN
 			EXECUTE FORMAT($$
-					INSERT INTO lt_model.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
+					INSERT INTO recorte.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
 					SELECT *, area_original area 
 					FROM (SELECT %1$L table_source, %2$L ownership_class, %3$L sub_class, ST_Area(%4$I) area_original, ST_Multi(ST_Force2D(%4$I)) geom, original_gid original_gid
 					FROM %1$I
@@ -56,24 +56,24 @@ BEGIN
 				$$, var_table_name, var_input.ownership_class, var_input.sub_class, geom_name, var_envelope, var_num_proc, var_proc);
 		ELSE
 			EXECUTE FORMAT($$
-					INSERT INTO lt_model.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
+					INSERT INTO recorte.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
 					SELECT *, area_original area 
 					FROM (SELECT %1$L table_source, %2$L ownership_class, %3$L sub_class, ST_Area(%4$I) area_original, ST_Multi(ST_Force2D(%4$I)) geom, original_gid original_gid
 					FROM %1$I
 					WHERE (gid %% %5$L) = %6$L) t
 				$$, var_table_name, var_input.ownership_class, var_input.sub_class, geom_name, var_num_proc, var_proc);
 		END IF;
-	ANALYZE lt_model.result;
+	ANALYZE recorte.result;
 	RAISE NOTICE 'Insertion of % completed!', var_table_name;
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION lt_model.proc0_insert_all_into_result(text, lt_model.inputs, text, integer, integer)
+ALTER FUNCTION recorte.proc0_insert_all_into_result(text, recorte.inputs, text, integer, integer)
   OWNER TO atlas;
   
-  CREATE OR REPLACE FUNCTION lt_model.proc0_update_intersection(
-    var_input lt_model.inputs,
+  CREATE OR REPLACE FUNCTION recorte.proc0_update_intersection(
+    var_input recorte.inputs,
     var_table_name text)
   RETURNS void AS
 $BODY$
@@ -82,7 +82,7 @@ BEGIN
 	RAISE NOTICE 'Erasing features which intersect with % and calculating area loss...', var_table_name; 
 
 	EXECUTE FORMAT($$
-		UPDATE lt_model.result a
+		UPDATE recorte.result a
 		SET 
 		geom = NULL::geometry, 
 		%3$I = a.area,
@@ -91,7 +91,7 @@ BEGIN
 		WHERE ST_Contains(b.geom, a.geom);
 
 
-		-- DELETE FROM lt_model.result a
+		-- DELETE FROM recorte.result a
 -- 		USING %1$I b
 -- 		WHERE ST_Intersects(b.geom, a.geom) AND NOT ST_Touches(b.geom, a.geom) AND a.sub_class = %2$L;
 	$$, var_table_name, var_input.sub_class, LOWER(var_input.sub_class) || '_area_loss');
@@ -105,8 +105,8 @@ BEGIN
 				r.sub_class,
 				ST_Force2D(ST_CollectionExtract(ST_Safe_Difference(r.geom, ST_Collect(m.geom)), 3)) geom,
 				r.area previous_area
-			FROM lt_model.result r
-			JOIN lt_model.%1$I m ON NOT ST_IsEmpty(m.geom) AND ST_Intersects(r.geom, m.geom)
+			FROM recorte.result r
+			JOIN recorte.%1$I m ON NOT ST_IsEmpty(m.geom) AND ST_Intersects(r.geom, m.geom)
 			GROUP BY r.gid, r.geom, r.area, r.sub_class);
 	$$, var_table_name, LOWER(var_input.sub_class) || '_area_loss', var_input.sub_class);
 	RAISE NOTICE 'Created tmp_atualiza';
@@ -117,7 +117,7 @@ BEGIN
 	SET current_area = ST_Area(geom);
 	RAISE NOTICE 'Area calculated';
 	EXECUTE FORMAT($$		
-		UPDATE lt_model.result r
+		UPDATE recorte.result r
 		SET 
 			geom = ST_Multi(ST_CollectionExtract(CASE WHEN ST_IsValid(A.geom) THEN A.geom ELSE ST_MakeValid(A.geom) END, 3)), 
 			%2$I = CASE WHEN A.sub_class = %3$L THEN NULL ELSE CASE WHEN %2$I IS NULL THEN 0 ELSE %2$I END + (previous_area - current_area) END,
@@ -127,18 +127,18 @@ BEGIN
 	$$, var_table_name, LOWER(var_input.sub_class) || '_area_loss', var_input.sub_class);
 
 
-	--DELETE FROM lt_model.result WHERE ST_IsEmpty(geom);
-	ANALYZE lt_model.result;
+	--DELETE FROM recorte.result WHERE ST_IsEmpty(geom);
+	ANALYZE recorte.result;
 	RAISE NOTICE 'Erasing intersection with % completed!', var_table_name; 
 END 
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION lt_model.proc0_update_intersection(lt_model.inputs, text)
+ALTER FUNCTION recorte.proc0_update_intersection(recorte.inputs, text)
   OWNER TO atlas;
   
-CREATE OR REPLACE FUNCTION lt_model.proc0_update_intersection(
-    var_input lt_model.inputs,
+CREATE OR REPLACE FUNCTION recorte.proc0_update_intersection(
+    var_input recorte.inputs,
     var_table_name text,
     var_num_proc integer,
     var_proc integer)
@@ -150,7 +150,7 @@ BEGIN
 
 
 	EXECUTE FORMAT($$
-		INSERT INTO lt_model.result_temp
+		INSERT INTO recorte.result_temp
 		SELECT 
 			A.gid,
 			ST_Multi(ST_CollectionExtract(CASE WHEN ST_IsValid(A.geom) THEN A.geom ELSE ST_MakeValid(A.geom) END, 3)) geom, 
@@ -169,28 +169,28 @@ BEGIN
 				END) geom,
 				r.area previous_area,
 				%2$I
-			FROM lt_model.result r
-			JOIN lt_model.%1$I m ON NOT ST_IsEmpty(m.geom) AND ST_IsValid(m.geom) AND ST_Intersects(r.geom, m.geom) AND (r.gid %% %4$L) = %5$L
+			FROM recorte.result r
+			JOIN recorte.%1$I m ON NOT ST_IsEmpty(m.geom) AND ST_IsValid(m.geom) AND ST_Intersects(r.geom, m.geom) AND (r.gid %% %4$L) = %5$L
 			GROUP BY r.gid, r.geom, r.area, r.sub_class, %2$I) B
 			) A
 		WHERE (A.gid %% %4$L) = %5$L
 	$$, var_table_name, LOWER(var_input.sub_class) || '_area_loss', var_input.sub_class, var_num_proc, var_proc);
 
 
-	ANALYZE lt_model.result;
+	ANALYZE recorte.result;
 	RAISE NOTICE 'Erasing intersection with % completed!', var_table_name; 
 END 
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION lt_model.proc0_update_intersection(lt_model.inputs, text, integer, integer)
+ALTER FUNCTION recorte.proc0_update_intersection(recorte.inputs, text, integer, integer)
   OWNER TO atlas;
   
-CREATE OR REPLACE FUNCTION lt_model.simplify_if_needed(var_input lt_model.inputs)
+CREATE OR REPLACE FUNCTION recorte.simplify_if_needed(var_input recorte.inputs)
   RETURNS text AS
 $BODY$
 DECLARE var_table_name TEXT = var_input.table_name;
-DECLARE var_table_simplify TEXT = lt_model.simplify_multipolygon_name(LEFT(var_table_name, 63));
+DECLARE var_table_simplify TEXT = recorte.simplify_multipolygon_name(LEFT(var_table_name, 63));
 DECLARE var_test BOOLEAN;
 DECLARE geom_name TEXT;
 DECLARE columns_not_gid TEXT;
@@ -236,16 +236,16 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION lt_model.simplify_if_needed(lt_model.inputs)
+ALTER FUNCTION recorte.simplify_if_needed(recorte.inputs)
   OWNER TO atlas;
   
-CREATE OR REPLACE FUNCTION lt_model.simplify_if_needed(
-    var_input lt_model.inputs,
+CREATE OR REPLACE FUNCTION recorte.simplify_if_needed(
+    var_input recorte.inputs,
     var_replace boolean)
   RETURNS text AS
 $BODY$
 DECLARE var_table_name TEXT = var_input.table_name;
-DECLARE var_table_simplify TEXT = lt_model.simplify_multipolygon_name(LEFT(var_table_name, 63));
+DECLARE var_table_simplify TEXT = recorte.simplify_multipolygon_name(LEFT(var_table_name, 63));
 DECLARE var_test BOOLEAN;
 DECLARE geom_name TEXT;
 DECLARE columns_not_gid TEXT;
@@ -283,5 +283,5 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION lt_model.simplify_if_needed(lt_model.inputs, boolean)
+ALTER FUNCTION recorte.simplify_if_needed(recorte.inputs, boolean)
   OWNER TO atlas;

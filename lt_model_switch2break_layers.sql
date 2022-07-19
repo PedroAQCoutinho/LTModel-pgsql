@@ -1,4 +1,4 @@
-UPDATE lt_model.inputs
+UPDATE recorte.inputs
 SET table_name = 
   CASE id
     WHEN 4  THEN 'input_break_acervofundiario_assentamentos_2019_incra'
@@ -29,7 +29,7 @@ SET table_name =
   ELSE table_name
   END
 
--- UPDATE lt_model.inputs
+-- UPDATE recorte.inputs
 -- SET table_name = 
 --   CASE id
 --     WHEN 4  THEN 'input_acervofundiario_assentamentos_2019_incra'

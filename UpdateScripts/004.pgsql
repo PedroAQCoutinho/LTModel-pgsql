@@ -1,29 +1,29 @@
-ALTER TABLE lt_model.params 
+ALTER TABLE recorte.params 
 ADD COLUMN param_text TEXT;
 
-INSERT INTO lt_model.params (param_name, param_desc, param_text)
+INSERT INTO recorte.params (param_name, param_desc, param_text)
 VALUES ('snci_input_table', 'Nome da tabela do SNCI utilizada para o processamento', 'input_acervofundiario_snci_particular_2018_incra');
 
-INSERT INTO lt_model.params (param_name, param_desc, param_text)
+INSERT INTO recorte.params (param_name, param_desc, param_text)
 VALUES ('snci_cert_date_column', 'Nome da coluna da data do certificado na tabela SNCI utilizada para processamento', 'data_certi');
 
-INSERT INTO lt_model.params (param_name, param_desc, param_text)
+INSERT INTO recorte.params (param_name, param_desc, param_text)
 VALUES ('snci_code_column', 'Nome da coluna com código do imóvel na tabela SNCI utilizada para processamento', 'cod_imovel');
 
 
-INSERT INTO lt_model.params (param_name, param_desc, param_text)
+INSERT INTO recorte.params (param_name, param_desc, param_text)
 VALUES ('sigef_input_table', 'Nome da tabela do SIGEF utilizada para o processamento', 'input_acervofundiario_sigef_particular_2018_incra');
 
-INSERT INTO lt_model.params (param_name, param_desc, param_text)
+INSERT INTO recorte.params (param_name, param_desc, param_text)
 VALUES ('sigef_cert_date_column', 'Nome da coluna da data do certificado na tabela SIGEF utilizada para processamento', 'data_aprov');
 
-INSERT INTO lt_model.params (param_name, param_desc, param_text)
+INSERT INTO recorte.params (param_name, param_desc, param_text)
 VALUES ('sigef_code_column', 'Nome da coluna com código do imóvel na tabela SIGEF utilizada para processamento', 'codigo_imo');
 
 ------------------------------
 -- FUNCAO
 ------------------------------
-CREATE OR REPLACE FUNCTION lt_model.clean_sigef(
+CREATE OR REPLACE FUNCTION recorte.clean_sigef(
     table_name text,
     key_name text,
     var_date_name text,
@@ -121,33 +121,33 @@ END IF;
 		SUM(original_area)
 	FROM log_operation operation,
 	sigef_cleaned b
-	WHERE operation.nom_operation = 'sigef' || sigef_alias || '_area_loss_gt_95' AND b.area_loss > (SELECT param_value FROM lt_model.params WHERE param_name = 'incra_pr_exclusion_tolerance')
+	WHERE operation.nom_operation = 'sigef' || sigef_alias || '_area_loss_gt_95' AND b.area_loss > (SELECT param_value FROM recorte.params WHERE param_name = 'incra_pr_exclusion_tolerance')
 	GROUP BY operation.id;
 
 	DELETE FROM sigef_cleaned
-	WHERE area_loss > (SELECT param_value FROM lt_model.params WHERE param_name = 'incra_pr_exclusion_tolerance');
+	WHERE area_loss > (SELECT param_value FROM recorte.params WHERE param_name = 'incra_pr_exclusion_tolerance');
 
 END $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION lt_model.clean_sigef(text, text, text, integer, integer)
+ALTER FUNCTION recorte.clean_sigef(text, text, text, integer, integer)
   OWNER TO postgres;
 ------------------------------------------------------------------------
 
 --------------------
 -- ROLLBACK
 --------------------
--- DELETE FROM lt_model.params
+-- DELETE FROM recorte.params
 -- WHERE param_name IN ('snci_input_table', 'snci_cert_date_column', 'snci_code_column');
 
--- ALTER TABLE lt_model.params 
+-- ALTER TABLE recorte.params 
 -- DROP COLUMN param_text;
 
--- -- Function: lt_model.clean_sigef(text, text, text, integer, integer)
+-- -- Function: recorte.clean_sigef(text, text, text, integer, integer)
 
--- -- DROP FUNCTION lt_model.clean_sigef(text, text, text, integer, integer);
+-- -- DROP FUNCTION recorte.clean_sigef(text, text, text, integer, integer);
 
--- CREATE OR REPLACE FUNCTION lt_model.clean_sigef(
+-- CREATE OR REPLACE FUNCTION recorte.clean_sigef(
 --     table_name text,
 --     key_name text,
 --     var_date_name text,
@@ -253,5 +253,5 @@ ALTER FUNCTION lt_model.clean_sigef(text, text, text, integer, integer)
 -- END $BODY$
 --   LANGUAGE plpgsql VOLATILE
 --   COST 100;
--- ALTER FUNCTION lt_model.clean_sigef(text, text, text, integer, integer)
+-- ALTER FUNCTION recorte.clean_sigef(text, text, text, integer, integer)
 --   OWNER TO postgres;

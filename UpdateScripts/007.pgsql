@@ -1,15 +1,15 @@
--- Function: lt_model.eliminate_car()
+-- Function: recorte.eliminate_car()
 
--- DROP FUNCTION lt_model.eliminate_car();
+-- DROP FUNCTION recorte.eliminate_car();
 
-CREATE OR REPLACE FUNCTION lt_model.eliminate_car()
+CREATE OR REPLACE FUNCTION recorte.eliminate_car()
   RETURNS void AS
 $BODY$
 BEGIN
 	DROP TABLE IF EXISTS temp_bounds_big; 
 	CREATE TEMP TABLE temp_bounds_big AS --5s --
 	SELECT DISTINCT a.rid, (ST_Dump(ST_ExteriorRing(a.geom))).geom::geometry(Linestring, 97823) geom, a.fla_eliminate
-	FROM lt_model.proc1_11_temp_car_consolidated a;
+	FROM recorte.proc1_11_temp_car_consolidated a;
 
 	CREATE INDEX gix_temp_bounds_big ON temp_bounds_big USING GIST (geom); --3.7s
 	CREATE INDEX gix_temp_bounds_big_eliminate ON temp_bounds_big USING BTREE (fla_eliminate); --0.3s

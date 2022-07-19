@@ -2,7 +2,7 @@
 	CREATE TEMP TABLE sheipinho_temp AS
 	SELECT ROW_NUMBER() OVER () gid, geom FROM (
 	SELECT (ST_Dump(geom)).geom
-	FROM lt_model.sheipinho2) A;
+	FROM recorte.sheipinho2) A;
 
 	DROP TABLE IF EXISTS nodes_max;
         CREATE TEMP TABLE nodes_max AS
@@ -56,10 +56,10 @@
 
 
 
-	DROP TABLE IF EXISTS lt_model.sheipinhocortado2;
-	CREATE TABLE lt_model.sheipinhocortado2 AS
+	DROP TABLE IF EXISTS recorte.sheipinhocortado2;
+	CREATE TABLE recorte.sheipinhocortado2 AS
         SELECT a.gid, (ST_Dump(geom)).geom
-        FROM (SELECT a.gid, lt_model.cut_polygon_multilinestring(a.geom, ST_Collect(ST_MakeLine(b.geom, b.geom2))) geom
+        FROM (SELECT a.gid, recorte.cut_polygon_multilinestring(a.geom, ST_Collect(ST_MakeLine(b.geom, b.geom2))) geom
         FROM sheipinho_temp a
         LEFT JOIN sheipinho_nodes b ON a.gid = b.gid
         GROUP BY a.gid, a.geom) A;

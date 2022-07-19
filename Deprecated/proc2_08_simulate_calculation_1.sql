@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS proc3_05_1_malha_municipio;
 CREATE TEMP TABLE proc3_05_1_malha_municipio AS
 SELECT a.gid, b.id fk_censo_categoria_areas_ibge, cd_mun_2006 cod_mun, area/10000 area
-FROM lt_model.result2 AS a
+FROM recorte.result2 AS a
 JOIN data.censo_categoria_areas_ibge AS b ON a.area/10000 >= b.limiar_inferior AND a.area/10000 < b.limiar_superior
 WHERE a.ownership_class = 'PL';
 
@@ -36,7 +36,7 @@ JOIN data.censo_areaimovel_ibge a ON a.fk_censo_categoria_areas_ibge = b.id;
 DROP TABLE IF EXISTS proc3_07_area_simular;
 CREATE TABLE proc3_07_area_simular AS
 SELECT cd_mun, SUM(ST_Area(geom))/10000 area 
-FROM lt_model.proc3_04_simulate_single a
+FROM recorte.proc3_04_simulate_single a
 JOIN data.municipio_ibge b ON a.cd_mun = b.cod_ibge
 GROUP BY cd_mun;
 

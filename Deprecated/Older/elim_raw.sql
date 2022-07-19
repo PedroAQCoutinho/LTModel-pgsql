@@ -5,13 +5,13 @@ SET search_path = lt_model,public;
 -- Create temporary copy of CAR to be consolidated
 DROP TABLE IF EXISTS temp_car_consolidated;
 CREATE TABLE temp_car_consolidated AS --2.6s
-SELECT *, false fla_multipolygon FROM lt_model.car_single WHERE NOT fla_eliminate;
+SELECT *, false fla_multipolygon FROM recorte.car_single WHERE NOT fla_eliminate;
 
 -- Extract boundaries as linestrings
 DROP TABLE IF EXISTS temp_bounds; 
 CREATE TABLE temp_bounds AS --5s --
 SELECT DISTINCT a.rid, (ST_Dump(ST_ExteriorRing(a.geom))).geom::geometry(Linestring, 97823) geom, a.fla_eliminate
-FROM lt_model.car_single a;
+FROM recorte.car_single a;
 
 CREATE INDEX gix_temp_bounds ON temp_bounds USING GIST (geom); --3.7s
 CREATE INDEX gix_temp_bounds_eliminate ON temp_bounds USING BTREE (fla_eliminate); --0.3s
