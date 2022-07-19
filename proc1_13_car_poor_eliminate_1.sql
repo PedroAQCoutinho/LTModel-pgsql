@@ -46,7 +46,7 @@ GROUP BY operation.id;
 -- Multi to single, calculate area and perimeter - 2.3
 DROP TABLE IF EXISTS proc1_09_car_single;
 CREATE TABLE proc1_09_car_single AS
-SELECT rid, gid, area_original, false fla_eliminate, 1-(area/area_original) area_loss, area, perimeter, CASE WHEN perimeter = 0 THEN 0 ELSE (2*SQRT(PI() * area))/perimeter END ci, ST_MakeValidSnapping(geom) geom
+SELECT rid, gid, area_original, false fla_eliminate, 1-(area/area_original) area_loss, area, perimeter, CASE WHEN perimeter = 0 THEN 0 ELSE (2*SQRT(PI() * area))/perimeter END ci, lt_model.ST_MakeValidSnapping(geom) geom
 FROM (
 	SELECT row_number() OVER () rid, gid, area_original, ST_Area(geom) area, ST_Perimeter(geom) perimeter, geom
 	FROM (
