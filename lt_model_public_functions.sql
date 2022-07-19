@@ -230,3 +230,17 @@ BEGIN
 		END;
 END
 $function$;
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION lt_model.st_makevalidsnapping(geom geometry)
+ RETURNS geometry
+ LANGUAGE sql
+ IMMUTABLE
+AS $function$
+		SELECT ST_CollectionExtract(ST_MakeValid(ST_SnapToGrid(geom, 1e-6)), 3);
+		$function$;
+
