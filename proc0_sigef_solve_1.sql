@@ -4,7 +4,7 @@ SET search_path TO recorte, public;
 SELECT nextval('seq_current_run');
 
 -- SIGEF clean
-SELECT recorte.clean_sigef((SELECT param_text FROM recorte.params WHERE param_name = 'snci_input_table'), (SELECT param_text FROM recorte.params WHERE param_name = 'snci_code_column'), (SELECT param_text FROM recorte.params WHERE param_name = 'snci_cert_date_column'), currval('seq_current_run')::int);
+SELECT lt_model.clean_sigef((SELECT param_text FROM recorte.params WHERE param_name = 'snci_input_table'), (SELECT param_text FROM recorte.params WHERE param_name = 'snci_code_column'), (SELECT param_text FROM recorte.params WHERE param_name = 'snci_cert_date_column'), currval('seq_current_run')::int);
 
 DROP TABLE IF EXISTS proc0_01_snci;
 CREATE TABLE recorte.proc0_01_snci AS
@@ -12,7 +12,7 @@ SELECT * FROM sigef_cleaned;
 
 
 -- SIGEF law clean
-SELECT recorte.clean_sigef((SELECT param_text FROM recorte.params WHERE param_name = 'sigef_input_table'), (SELECT param_text FROM recorte.params WHERE param_name = 'sigef_code_column'), (SELECT param_text FROM recorte.params WHERE param_name = 'sigef_cert_date_column'), currval('seq_current_run')::int);
+SELECT lt_model.clean_sigef((SELECT param_text FROM recorte.params WHERE param_name = 'sigef_input_table'), (SELECT param_text FROM recorte.params WHERE param_name = 'sigef_code_column'), (SELECT param_text FROM recorte.params WHERE param_name = 'sigef_cert_date_column'), currval('seq_current_run')::int);
 
 DROP TABLE IF EXISTS proc0_02_sigef;
 CREATE TABLE recorte.proc0_02_sigef AS
