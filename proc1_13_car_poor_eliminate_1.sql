@@ -108,11 +108,11 @@ false fla_multipolygon FROM proc1_09_car_single WHERE NOT fla_eliminate;
 DROP TABLE IF EXISTS temp_already_process CASCADE;
 CREATE TEMP TABLE temp_already_process(small INT);
 
-SELECT recorte.eliminate_car();
+SELECT lt_model.eliminate_car();
 
 DO $$
 BEGIN
-WHILE (SELECT recorte.eliminate_car_recursive()) > 0 LOOP
+WHILE (SELECT lt_model.eliminate_car_recursive()) > 0 LOOP
 END LOOP;
 END $$;
 
