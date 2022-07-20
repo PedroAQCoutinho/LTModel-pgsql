@@ -554,7 +554,7 @@ CREATE OR REPLACE FUNCTION lt_model.create_result()
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-CREATE TABLE lt_model.result
+CREATE TABLE recorte.result
 (
   gid SERIAL PRIMARY KEY,
   table_source text,
@@ -589,12 +589,13 @@ WITH (
   OIDS=FALSE
 );
 
+
 -- Index: lt_model.gix_result
 
 -- DROP INDEX lt_model.gix_result;
 
 CREATE INDEX gix_result
-  ON lt_model.result
+  ON recorte.result
   USING gist
   (geom);
 
