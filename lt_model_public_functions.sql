@@ -511,7 +511,7 @@ SELECT * INTO var_input FROM lt_model.inputs WHERE table_name = var_table_name A
 
 		IF (SELECT COUNT(*) FROM lt_model.result) > 0 THEN
 			PERFORM lt_model.proc0_update_intersection(var_input, var_table_name);
-			IF NOT EXISTS (SELECT table_source FROM lt_model.result WHERE table_source = var_table_name AND sub_class = var_sub_class) THEN
+			IF NOT EXISTS (SELECT table_source FROM recorte.result WHERE table_source = var_table_name AND sub_class = var_sub_class) THEN
 				PERFORM lt_model.proc0_insert_all_into_result(var_table_name, var_input, var_envelope);
 			END IF;
 		ELSE
@@ -530,7 +530,7 @@ AS $function$
 DECLARE result TEXT;
 BEGIN
 CLUSTER lt_model.inputs;
-SELECT 'SET search_path TO lt_model, public;SELECT clock_timestamp();DROP TABLE lt_model.result;SELECT lt_model.create_result();' || string_agg(format($$SELECT lt_model.add_layer('%s', '%s', %s)$$, table_name, sub_class, uf_code), ';') || ';SELECT clock_timestamp();' INTO result 
+SELECT 'SET search_path TO lt_model, public;SELECT clock_timestamp();DROP TABLE recorte.result;SELECT lt_model.create_result();' || string_agg(format($$SELECT lt_model.add_layer('%s', '%s', %s)$$, table_name, sub_class, uf_code), ';') || ';SELECT clock_timestamp();' INTO result 
 FROM lt_model.inputs
 WHERE fla_proc;
 RETURN result;
