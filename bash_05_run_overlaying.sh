@@ -20,7 +20,7 @@ function runOverlayingRules {
 
 
 ## Get run statement in sql file
-psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -t -c "SELECT recorte.run_statement()" > run_stmt.sql
+psql -U $userName -h $databaseServer -d $databaseName -p $portNumber -t -c "SELECT lt_model.run_statement()" > run_stmt.sql
 
 ## Run overlaying rules for random
 runOverlayingRules
