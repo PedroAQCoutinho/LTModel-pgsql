@@ -546,3 +546,57 @@ AS $function$
 	SELECT LEFT(regexp_replace(var_table_name, '([^]_)$', '_sim\1'), 63);
 $function$
 ;
+
+
+
+CREATE OR REPLACE FUNCTION lt_model.create_result()
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+CREATE TABLE lt_model.result
+(
+  gid SERIAL PRIMARY KEY,
+  table_source text,
+  ownership_class text,
+  sub_class text,
+  area_original numeric(30,4),
+  original_gid bigint,
+  geom geometry(MultiPolygon,97823),
+  area numeric(30,4),
+  ag_area_loss numeric(30,2),
+  aru_area_loss numeric(30,2),
+  carpo_area_loss numeric(30,2),
+  carpr_area_loss numeric(30,2),
+  com_area_loss numeric(30,2),
+  ml_area_loss numeric(30,2),
+  nd_b_area_loss numeric(30,2),
+  nd_i_area_loss numeric(30,2),
+  ql_area_loss numeric(30,2),
+  sigef_area_loss numeric(30,2),
+  ti_h_area_loss numeric(30,2),
+  ti_n_area_loss numeric(30,2),
+  tlpc_area_loss numeric(30,2),
+  tlpl_area_loss numeric(30,2),
+  trans_area_loss numeric(30,2),
+  ucpi_area_loss numeric(30,2),
+  ucus_area_loss numeric(30,2),
+  urb_area_loss numeric(30,2),
+  cd_mun_2006 integer,
+  rast integer
+)
+WITH (
+  OIDS=FALSE
+);
+
+-- Index: lt_model.gix_result
+
+-- DROP INDEX lt_model.gix_result;
+
+CREATE INDEX gix_result
+  ON lt_model.result
+  USING gist
+  (geom);
+
+END $function$
+;
