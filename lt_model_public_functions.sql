@@ -520,3 +520,19 @@ SELECT * INTO var_input FROM lt_model.inputs WHERE table_name = var_table_name A
 		RAISE NOTICE 'Finished at: %', clock_timestamp();
 END $function$
 ;
+
+
+
+CREATE OR REPLACE FUNCTION lt_model.run_statement(uf_code integer DEFAULT '-1'::integer)
+ RETURNS text
+ LANGUAGE plpgsql
+AS $function$
+DECLARE result TEXT;
+BEGIN
+CLUSTER lt_model.inputs;
+SELECT 'SET search_path TO lt_model, public;SELECT clock_timestamp();DROP TABLE lt_model.result;SELECT lt_model.create_result();' || string_agg(format($$SELECT lt_model.add_layer('%s', '%s', %s)$$, table_name, sub_class, uf_code), ';') || ';SELECT clock_timestamp();' INTO result 
+FROM lt_model.inputs
+WHERE fla_proc;
+RETURN result;
+END $function$
+;
