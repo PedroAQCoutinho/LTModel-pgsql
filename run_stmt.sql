@@ -1,2 +1,23 @@
- SET search_path TO lt_model, public;SELECT clock_timestamp();DROP TABLE lt_model.result;SELECT lt_model.create_result();SELECT lt_model.add_layer('input_florestastipob_sfb_2020', 'ND_B', -1);SELECT lt_model.add_layer('input_snci_publico_incra_2020', 'ND_I', -1);SELECT lt_model.add_layer('input_sigef_publico_incra_2020', 'ND_I', -1);SELECT lt_model.add_layer('input_terralegal_glebasfederais_incra_2016', 'TLPC', -1);SELECT lt_model.add_layer('lt_model_car_po', 'CARpo', -1);SELECT lt_model.add_layer('lt_model_car_pr', 'CARpr', -1);SELECT lt_model.add_layer('lt_model_incra_pr', 'SIGEF', -1);SELECT lt_model.add_layer('input_terralegal_particular_incra_2016', 'TLPL', -1);SELECT lt_model.add_layer('input_florestastipoa_militar_sfb_2020', 'ML', -1);SELECT lt_model.add_layer('input_bi_am_areamilitar_1000_2016_ibge', 'ML', -1);SELECT lt_model.add_layer('input_assentamentos_incra_2020', 'ARU', -1);SELECT lt_model.add_layer('input_florestastipoa_comunitario_sfb_2020', 'COM', -1);SELECT lt_model.add_layer('input_quilombolas_incra_2020', 'QL', -1);SELECT lt_model.add_layer('input_ucs_mma_2019_simex', 'UCUS', -1);SELECT lt_model.add_layer('input_ucs_mma_2019_simex', 'UCPI', -1);SELECT lt_model.add_layer('input_terrasindigenas_funai_2020', 'TI_N', -1);SELECT lt_model.add_layer('input_terrasindigenas_funai_2020', 'TI_H', -1);SELECT clock_timestamp();
+ SET search_path TO lt_model, public;
+ SELECT clock_timestamp();
+ DROP TABLE lt_model.result;
+ SELECT lt_model.create_result();
+ SELECT lt_model.add_layer('input_florestastipob_sfb_2020', 'ND_B', -1);
+ SELECT lt_model.add_layer('input_snci_publico_incra_2020', 'ND_I', -1);
+ SELECT lt_model.add_layer('input_sigef_publico_incra_2020', 'ND_I', -1);
+ SELECT lt_model.add_layer('input_terralegal_glebasfederais_incra_2016', 'TLPC', -1);
+ SELECT lt_model.add_layer('lt_model_car_po', 'CARpo', -1);
+ SELECT lt_model.add_layer('lt_model_car_pr', 'CARpr', -1);
+ SELECT lt_model.add_layer('lt_model_incra_pr', 'SIGEF', -1);
+ SELECT lt_model.add_layer('input_terralegal_particular_incra_2016', 'TLPL', -1);
+ SELECT lt_model.add_layer('input_florestastipoa_militar_sfb_2020', 'ML', -1);
+ SELECT lt_model.add_layer('input_bi_am_areamilitar_1000_2016_ibge', 'ML', -1);
+ SELECT lt_model.add_layer('input_assentamentos_incra_2020', 'ARU', -1);
+ SELECT lt_model.add_layer('input_florestastipoa_comunitario_sfb_2020', 'COM', -1);
+ SELECT lt_model.add_layer('input_quilombolas_incra_2020', 'QL', -1);
+ SELECT lt_model.add_layer('input_ucs_mma_2019_simex', 'UCUS', -1);
+ SELECT lt_model.add_layer('input_ucs_mma_2019_simex', 'UCPI', -1);
+ SELECT lt_model.add_layer('input_terrasindigenas_funai_2020', 'TI_N', -1);
+ SELECT lt_model.add_layer('input_terrasindigenas_funai_2020', 'TI_H', -1);
+ SELECT clock_timestamp();
 
