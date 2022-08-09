@@ -1,6 +1,7 @@
-userName=atlas
-databaseServer=127.0.0.1
-databaseName=atlas
+export PGPASSWORD='gpp-es@lq'
+userName=postgres
+databaseServer=0.0.0.0
+databaseName=lt_model_subset
 numProc=1
 portNumber=5432
 wait=false
@@ -8,11 +9,11 @@ error=false
 varPriority=random
 
 if [ -n "${USER+1}" ]; then
-  userName=$USER
+  userName=postgres
 fi
 
 if [ -n "${PGDATABASE+1}" ]; then
-  databaseName=$PGDATABASE
+  databaseName=lt_model_subset
 fi
 
 if [ -n "${PGPORT+1}" ]; then
@@ -49,7 +50,7 @@ invalid=${@:$OPTIND+2:1}
 if [ $error == true ]
 then
   echo "Usage: ./luga_process.sh [-h host] [-p port] [-U user] [-d database] [-j Number_of_jobs] [proc_name_resume]" 
-  echo "Default values: host=127.0.0.1 port=5432 user=postgres database=atlas Number_of_jobs=1 proc_name_resume=" 
+  echo "Default values: host=127.0.0.1 port=5432 user=postgres database=postgres Number_of_jobs=1 proc_name_resume=" 
   echo
   echo "Remark: database must accept login without password: interactive session would not be suitable for this batch script."
   exit
