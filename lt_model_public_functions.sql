@@ -653,3 +653,99 @@ BEGIN
 END
 $function$
 ;
+
+
+
+
+CREATE OR REPLACE FUNCTION lt_model.proc0_update_intersection(var_input lt_model.inputs, var_table_name text)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+	SET search_path TO public, lt_model;
+	RAISE NOTICE 'Erasing features which intersect with % and calculating area loss...', var_table_name; 
+	
+	EXECUTE FORMAT($$
+		UPDATE lt_model.result a
+		SET 
+		geom = NULL::geometry, 
+		%3$I = a.area,
+		area = 0
+		FROM %1$I b
+		WHERE ST_Contains(b.geom, a.geom);
+
+		-- DELETE FROM lt_model.result a
+-- 		USING %1$I b
+-- 		WHERE ST_Intersects(b.geom, a.geom) AND NOT ST_Touches(b.geom, a.geom) AND a.sub_class = %2$L;
+	$$, var_table_name, var_input.sub_class, LOWER(var_input.sub_class) || '_area_loss');
+
+
+	EXECUTE FORMAT($$
+			DROP TABLE IF EXISTS tmp_atualiza;
+			CREATE TEMP TABLE tmp_atualiza AS (
+			SELECT 
+				r.gid gid, 
+				r.sub_class,
+				ST_Force2D(ST_CollectionExtract(ST_Safe_Difference(r.geom, ST_Collect(dp.geom)), 3)) geom,
+				r.area previous_area
+			FROM lt_model.result r, lt_model.%1$I m,
+			LATERAL (SELECT dump.geom FROM st_dump(m.geom) dump ) dp
+			WHERE NOT ST_IsEmpty(m.geom) AND ST_Intersects(r.geom, ST_CollectionExtract(ST_makeValid(m.geom),3))
+			GROUP BY r.gid, r.geom, r.area, r.sub_class);
+	$$, var_table_name, LOWER(var_input.sub_class) || '_area_loss', var_input.sub_class);
+	
+	ALTER TABLE tmp_atualiza
+	ADD COLUMN current_area NUMERIC;
+
+	UPDATE tmp_atualiza
+	SET current_area = ST_Area(geom);
+	RAISE NOTICE 'Area calculated';
+	EXECUTE FORMAT($$		
+		UPDATE lt_model.result r
+		SET 
+			geom = ST_Multi(ST_CollectionExtract(CASE WHEN ST_IsValid(A.geom) THEN A.geom ELSE ST_MakeValid(A.geom) END, 3)), 
+			%2$I = CASE WHEN A.sub_class = %3$L THEN NULL ELSE CASE WHEN %2$I IS NULL THEN 0 ELSE %2$I END + (previous_area - current_area) END,
+			area = current_area
+		FROM tmp_atualiza A
+		WHERE r.gid = A.gid;
+	$$, var_table_name, LOWER(var_input.sub_class) || '_area_loss', var_input.sub_class);
+
+
+	--DELETE FROM lt_model.result WHERE ST_IsEmpty(geom);
+	ANALYZE lt_model.result;
+	RAISE NOTICE 'Erasing intersection with % completed!', var_table_name; 
+END 
+$function$
+;
+
+
+CREATE OR REPLACE FUNCTION lt_model.proc0_insert_all_into_result(var_table_name text, var_input lt_model.inputs, var_envelope text)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE geom_name TEXT = (select column_name from information_schema.columns WHERE table_name = var_table_name AND udt_name = 'geometry');
+BEGIN
+	SET search_path TO public, lt_model;
+	RAISE NOTICE 'Inserting all geometries from %...', var_table_name;
+		IF var_envelope != '' THEN
+			EXECUTE FORMAT($$
+					INSERT INTO lt_model.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
+					SELECT *, area_original area 
+					FROM (SELECT %1$L table_source, %2$L ownership_class, %3$L sub_class, ST_Area(%4$I) area_original, ST_Multi(ST_Force2D(%4$I)) geom, original_gid original_gid
+					FROM %1$I
+					WHERE ST_Intersects(%4$I, ST_GeomFromText(%5$L, 97823))) t
+				$$, var_table_name, var_input.ownership_class, var_input.sub_class, geom_name, var_envelope);
+		ELSE
+			EXECUTE FORMAT($$
+					INSERT INTO lt_model.result(table_source, ownership_class, sub_class, area_original, geom, original_gid, area)
+					SELECT *, area_original area 
+					FROM (SELECT %1$L table_source, %2$L ownership_class, %3$L sub_class, ST_Area(%4$I) area_original, ST_Multi(ST_Force2D(%4$I)) geom, original_gid original_gid
+					FROM %1$I
+					) t
+				$$, var_table_name, var_input.ownership_class, var_input.sub_class, geom_name);
+		END IF;
+	ANALYZE lt_model.result;
+	RAISE NOTICE 'Insertion of % completed!', var_table_name;
+END
+$function$
+;
