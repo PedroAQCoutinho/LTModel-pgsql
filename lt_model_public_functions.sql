@@ -723,7 +723,7 @@ CREATE OR REPLACE FUNCTION lt_model.proc0_insert_all_into_result(var_table_name 
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
-DECLARE geom_name TEXT = (select column_name from information_schema.columns WHERE table_name = var_table_name AND udt_name = 'geometry');
+DECLARE geom_name TEXT = (select column_name from information_schema.columns WHERE table_name = var_table_name AND udt_name = 'geometry' and column_name not in ('st_intersection', 'geom1'));
 BEGIN
 	SET search_path TO public, lt_model;
 	RAISE NOTICE 'Inserting all geometries from %...', var_table_name;
