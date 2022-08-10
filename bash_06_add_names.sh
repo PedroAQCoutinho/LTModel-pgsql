@@ -22,5 +22,5 @@ do
 done < saida.csv
 
 
-rm saida.csv
+#rm saida.csv
 IFS=$OLDIFS
