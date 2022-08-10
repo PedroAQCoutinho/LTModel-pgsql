@@ -601,3 +601,55 @@ CREATE INDEX gix_result
 
 END $function$
 ;
+
+
+CREATE OR REPLACE FUNCTION lt_model.simplify_if_needed(var_input lt_model.inputs)
+ RETURNS text
+ LANGUAGE plpgsql
+AS $function$
+DECLARE var_table_name TEXT = var_input.table_name;
+DECLARE var_table_simplify TEXT = lt_model.simplify_multipolygon_name(LEFT(var_table_name, 63));
+DECLARE var_test BOOLEAN;
+DECLARE geom_name TEXT;
+DECLARE columns_not_gid TEXT;
+DECLARE where_clause TEXT = CASE WHEN var_input.where_clause IS NOT NULL AND var_input.where_clause != '' THEN ' AND ' || var_input.where_clause ELSE '' END;
+BEGIN
+	EXECUTE format($$SELECT column_name FROM information_schema.columns WHERE table_name = %L AND udt_name = 'geometry'$$, var_table_name) INTO geom_name;
+	SELECT true INTO var_test;
+	IF var_test THEN
+		RAISE INFO 'Simplifying multipolygon in %...', var_table_name;
+		EXECUTE FORMAT($$SELECT string_agg('"' || column_name || '"', ', ')
+			FROM (
+				SELECT DISTINCT column_name 
+				FROM information_schema.columns 
+				WHERE table_name = %L 
+					AND column_name NOT IN ('gid', %L)) A$$
+		, var_table_name, geom_name) INTO columns_not_gid;
+
+		EXECUTE format($$
+				DROP TABLE IF EXISTS "lt_model".%1$I;
+				CREATE TABLE IF NOT EXISTS "lt_model".%1$I AS 
+				-- Testing NO SIMPLIFY
+				-- SELECT (row_number() OVER ())::INT gid, *
+				-- FROM (
+-- 					SELECT gid original_gid, %2$s, ST_CollectionExtract(ST_MakeValid((ST_DUMP(ST_Force2D(%3$I))).geom), 3) geom
+-- 					FROM %4$I
+-- 					WHERE true %6$s
+-- 					) A;
+				SELECT (row_number() OVER ())::INT gid, *
+				FROM (
+					SELECT gid original_gid, %2$s, ST_CollectionExtract(ST_MakeValid((ST_Force2D(%3$I))), 3) geom
+					FROM %4$I
+					WHERE true %6$s
+					) A;
+				CREATE INDEX IF NOT EXISTS ix_%5$s ON "lt_model".%1$I USING GIST (geom)
+			$$, var_table_simplify, columns_not_gid, geom_name, var_table_name, LEFT(var_table_simplify, 60), where_clause);
+		RAISE INFO 'Multipolygon to Polygon of % completed!', var_table_name;
+		RETURN var_table_simplify;
+	END IF;
+
+	
+	RETURN var_table_name;
+END
+$function$
+;
