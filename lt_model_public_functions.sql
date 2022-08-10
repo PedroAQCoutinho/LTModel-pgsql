@@ -543,7 +543,7 @@ CREATE OR REPLACE FUNCTION lt_model.simplify_multipolygon_name(var_table_name te
  LANGUAGE sql
  IMMUTABLE
 AS $function$
-	SELECT LEFT(regexp_replace(var_table_name, '([^]_)$', '_sim\1'), 63);
+	SELECT LEFT(regexp_replace(var_table_name, '(_[^_]*_*)$', '_sim\1'), 63);
 $function$
 ;
 
